@@ -1,5 +1,6 @@
 package com.stirperichard.stormbus.entity;
 
+import com.stirperichard.stormbus.enums.BreakdownOrRunningLate;
 import com.stirperichard.stormbus.enums.Reason;
 
 import java.io.Serializable;
