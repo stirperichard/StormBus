@@ -37,7 +37,7 @@ public class Main {
         builder.setSpout("datasource", new RedisSpout(redisUrl, redisPort));
 
         //Parser
-        builder.setBolt("parser", new ParseCSV())
+        builder.setBolt("parser", new ParseCSVQuery1())
                 .setNumTasks(numTasks)
                 .shuffleGrouping("datasource");
 
