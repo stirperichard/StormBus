@@ -196,4 +196,15 @@ public class Bus implements Serializable {
     public void setSchoolAgeOrPreK(String schoolAgeOrPreK) {
         this.schoolAgeOrPreK = schoolAgeOrPreK;
     }
+
+    @Override
+    public String toString() {
+        return "Bus{" +
+                "reason=" + reason +
+                ", occurredOn='" + occurredOn + '\'' +
+                ", boro='" + boro + '\'' +
+                ", busCompanyName='" + busCompanyName + '\'' +
+                ", howLongDelayed='" + howLongDelayed + '\'' +
+                '}';
+    }
 }
