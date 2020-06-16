@@ -59,7 +59,7 @@ public class CountByWindow extends BaseRichBolt {
 
         } else {
 
-            handleTaxiReport(input);
+            //handleTaxiReport(input);
 
         }
     }

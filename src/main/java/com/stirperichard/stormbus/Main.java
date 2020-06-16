@@ -42,20 +42,18 @@ public class Main {
                 .shuffleGrouping("datasource");
 
         //Filter
-        builder.setBolt("filterByCoordinates", new ConvertDatetime())
+        builder.setBolt("convertDateTime", new ConvertDatetime())
                 .setNumTasks(numTasks)
                 .shuffleGrouping("parser");
-
+/*
         builder.setBolt("metronome", new Metronome())
                 .setNumTasks(numTasksMetronome)
                 .shuffleGrouping("filterByCoordinates");
-/*
+
         builder.setBolt("computeCellID", new ComputeCellID())
                 .setNumTasks(numTasks)
                 .shuffleGrouping("filterByCoordinates");
 
- */
-/*
         builder.setBolt("countByWindow", new CountByWindow())
                 .setNumTasks(numTasks)
                 .fieldsGrouping("computeCellID", new Fields(ComputeCellID.F_ROUTE))
@@ -68,11 +66,11 @@ public class Main {
         builder.setBolt("partialRank", new PartialRank(10))
                 .setNumTasks(numTasks)
                 .fieldsGrouping("countByWindow", new Fields(ComputeCellID.F_ROUTE));
-*/
+
         builder.setBolt("globalRank", new GlobalRank(10, rabbitMqHost, rabbitMqUsername, rabbitMqPassword), 1)
                 .setNumTasks(numTasksGlobalRank)
                 .shuffleGrouping("partialRank");
-
+*/
         StormTopology stormTopology = builder.createTopology();
 
         /* Create configurations */
