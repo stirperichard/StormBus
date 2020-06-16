@@ -1,5 +1,7 @@
 package com.stirperichard.stormbus.utils;
 
+import org.apache.storm.tuple.Tuple;
+
 public class ParseTime {
 
     //Converto la colonna non omogenea in soli interi [minutes] <- misura std di riferimento
@@ -24,7 +26,7 @@ public class ParseTime {
         //Controllo se ha "-" oppure "/" -> SPLIT
         if (delay.contains("-") || delay.contains("/")){
             delays = delay.split("-/", -1);
-            if (delays[0] == "1" && delays[1] == "2"){
+            if (delays[0].equals("1") && delays[1].equals("2")){
                 delay = String.valueOf(0.5);
             }
 
@@ -57,6 +59,7 @@ public class ParseTime {
                     checkEmpty(delays[i]);
 
                     newDelay += Integer.parseInt(delays[i]);
+                    newDelay = newDelay / 2;
                 }
             }
             return String.valueOf(newDelay);
