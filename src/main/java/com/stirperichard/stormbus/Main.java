@@ -42,7 +42,7 @@ public class Main {
                 .shuffleGrouping("datasource");
 
         //Filter
-        builder.setBolt("filterByCoordinates", new FilterByCoordinates())
+        builder.setBolt("filterByCoordinates", new ConvertDatetime())
                 .setNumTasks(numTasks)
                 .shuffleGrouping("parser");
 

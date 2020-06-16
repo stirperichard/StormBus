@@ -19,7 +19,7 @@ public class RedisSpout extends BaseRichSpout {
 
 	public static final String F_DATA 		=	"RowString";
 	public static final String F_MSGID		= 	"MSGID";
-	//public static final String F_TIMESTAMP 	= 	"timestamp";
+	public static final String F_TIMESTAMP 	= 	"timestamp";
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -68,14 +68,14 @@ public class RedisSpout extends BaseRichSpout {
 
 			/* Send data */
 			LinesBatch linesBatch = gson.fromJson(data, LinesBatch.class);
-			//String now = String.valueOf(System.currentTimeMillis());
+			String now = String.valueOf(System.currentTimeMillis());
 			
 			for (String row : linesBatch.getLines()) {
 				msgId++;
 				Values values = new Values();
 				values.add(Long.toString(msgId));
 				values.add(row);
-				//values.add(now);
+				values.add(now);
 				this._collector.emit(values, msgId);
 			}
 				
@@ -87,12 +87,12 @@ public class RedisSpout extends BaseRichSpout {
 			jedis = new Jedis(redisUrl, redisPort, redisTimeout);
 		}
 	}
-	
+
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 
-		//declarer.declare(new Fields(F_MSGID, F_DATA, F_TIMESTAMP));
-		declarer.declare(new Fields(F_MSGID, F_DATA));
+		declarer.declare(new Fields(F_MSGID, F_DATA, F_TIMESTAMP));
+		//declarer.declare(new Fields(F_MSGID, F_DATA));
 	}
 	
 	@Override

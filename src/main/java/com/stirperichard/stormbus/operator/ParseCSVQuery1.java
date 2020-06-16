@@ -19,6 +19,7 @@ public class ParseCSVQuery1 extends BaseRichBolt {
     public static final String OCCURRED_ON       	= "occurredOn";
     public static final String BORO 	            = "boro";
     public static final String HOW_LONG_DELAYED 	= "howLongDelayed";
+    public static final String F_TIMESTAMP 	= 	"timestamp";
 
     private OutputCollector collector;
 
@@ -32,7 +33,7 @@ public class ParseCSVQuery1 extends BaseRichBolt {
     public void execute(Tuple input) {
         String rawData 	= input.getStringByField(RedisSpout.F_DATA);
         String msgId 	= input.getStringByField(RedisSpout.F_MSGID);
-        //String timestamp = input.getStringByField(RedisSpout.F_TIMESTAMP);
+        String timestamp = input.getStringByField(RedisSpout.F_TIMESTAMP);
 
         /* Do NOT emit if the EOF has been reached */
         if (rawData == null || rawData.equals(Constants.REDIS_EOF)){
@@ -49,7 +50,9 @@ public class ParseCSVQuery1 extends BaseRichBolt {
 
         Values values = new Values();
 
-        values.add(msgId); //Aggiungo il MessageID
+        //Aggiungo il MessageID
+        values.add(msgId);
+
 
         //Controllo la validità e aggiungo il valore della varibile Occurred_On (campo 7)
         if (!data[7].isEmpty()){
@@ -66,12 +69,15 @@ public class ParseCSVQuery1 extends BaseRichBolt {
             values.add(minutesDelayed(data[11]));
         }
 
+        values.add(timestamp);
+
+
         collector.emit(values);
         collector.ack(input);
     }
 
 
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields(F_MSGID, OCCURRED_ON, BORO, HOW_LONG_DELAYED));
+        outputFieldsDeclarer.declare(new Fields(F_MSGID, OCCURRED_ON, BORO, HOW_LONG_DELAYED, F_TIMESTAMP));
     }
 }
