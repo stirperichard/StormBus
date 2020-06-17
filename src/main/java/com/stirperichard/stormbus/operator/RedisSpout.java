@@ -71,6 +71,7 @@ public class RedisSpout extends BaseRichSpout {
 			String now = String.valueOf(System.currentTimeMillis());
 			
 			for (String row : linesBatch.getLines()) {
+				System.out.println("\u001B[31m" + row + "\u001B[0m");
 				msgId++;
 				Values values = new Values();
 				values.add(Long.toString(msgId));
@@ -92,7 +93,6 @@ public class RedisSpout extends BaseRichSpout {
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 
 		declarer.declare(new Fields(F_MSGID, F_DATA, F_TIMESTAMP));
-		//declarer.declare(new Fields(F_MSGID, F_DATA));
 	}
 	
 	@Override

@@ -1,14 +1,11 @@
 package com.stirperichard.stormbus;
 
-import com.stirperichard.stormbus.operator.ConvertDatetime;
-import com.stirperichard.stormbus.operator.ParseCSVQuery1;
 import com.stirperichard.stormbus.operator.RedisSpout;
 import com.stirperichard.stormbus.utils.TConf;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.utils.Utils;
 
 public class Main {
 
@@ -38,7 +35,7 @@ public class Main {
 
         //Redis
         builder.setSpout("datasource", new RedisSpout(redisUrl, redisPort));
-
+/*
         //Parser
         builder.setBolt("parser", new ParseCSVQuery1())
                 .setNumTasks(numTasks)
@@ -48,7 +45,7 @@ public class Main {
         builder.setBolt("convertDateTime", new ConvertDatetime())
                 .setNumTasks(numTasks)
                 .shuffleGrouping("parser");
-/*
+
         builder.setBolt("metronome", new Metronome())
                 .setNumTasks(numTasksMetronome)
                 .shuffleGrouping("filterByCoordinates");
@@ -98,9 +95,12 @@ public class Main {
         //StormSubmitter.submitTopology(args[0], conf, stormTopology);
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("test", conf, builder.createTopology());
+        /*
         Utils.sleep(10000);
         cluster.killTopology("test");
         cluster.shutdown();
+
+         */
 
     }
 }
