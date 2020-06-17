@@ -57,7 +57,7 @@ public class RedisSpout extends BaseRichSpout {
 			
 				try {
 					Thread.sleep(SHORT_SLEEP);
-				} catch (InterruptedException e) { }
+				} catch (InterruptedException ignored) { }
 
 				data = jedis.get(Constants.REDIS_DATA);
 			
@@ -71,6 +71,7 @@ public class RedisSpout extends BaseRichSpout {
 			String now = String.valueOf(System.currentTimeMillis());
 			
 			for (String row : linesBatch.getLines()) {
+				System.out.println("\033[0;33m" + row + "\033[0m");
 				msgId++;
 				Values values = new Values();
 				values.add(Long.toString(msgId));
