@@ -9,6 +9,13 @@ import org.apache.storm.topology.TopologyBuilder;
 
 public class Main {
 
+    public static final int TOP_N = 10;
+    public static int PROFIT_WINDOW = 15 * 60; // in seconds
+    public static int EMPTY_WINDOW = 30 * 60; // in seconds
+    public static String OUTPUT_FILE = "rankings.output";
+
+
+
     public static void main(String[] args) throws Exception {
 	// write your code here
         TConf config = new TConf();
@@ -70,6 +77,10 @@ public class Main {
         builder.setBolt("globalRank", new GlobalRank(10, rabbitMqHost, rabbitMqUsername, rabbitMqPassword), 1)
                 .setNumTasks(numTasksGlobalRank)
                 .shuffleGrouping("partialRank");
+
+        builder.setBolt("rankings", new RankingBolt(TOP_N)).globalGrouping("profitability");
+
+        builder.setBolt("to_file", new DataWriter(OUTPUT_FILE)).globalGrouping("rankings");
 */
         StormTopology stormTopology = builder.createTopology();
 

@@ -20,5 +20,13 @@ public class Constants {
 	public static final String BORO 	            = "boro";
 	public static final String BUS_COMPANY_NAME    	= "busCompanyName";
 	public static final String HOW_LONG_DELAYED 	= "howLongDelayed";
-	
+
+
+
+	// how often a tick tuple will be sent to our bolt
+	public static final int SECONDS_PER_TIME_UNIT = 1;
+	// mapping system time to time in tuples
+	public static final int TIME_UNIT_IN_SECONDS = 60;
+
+
 }
