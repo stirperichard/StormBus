@@ -38,11 +38,11 @@ public class ConvertDatetime extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
 
-        String msgId 	        = input.getStringByField(ParseCSVQuery1.F_MSGID);
-        String boro             = input.getStringByField(ParseCSVQuery1.BORO);
-        String howLongDelayed   = input.getStringByField(ParseCSVQuery1.HOW_LONG_DELAYED);
-        String occurredOn       = input.getStringByField(ParseCSVQuery1.OCCURRED_ON);
-        String timestamp        = input.getStringByField(ParseCSVQuery1.F_TIMESTAMP);
+        String msgId 	        = input.getStringByField(ParseCSV.F_MSGID);
+        String boro             = input.getStringByField(ParseCSV.BORO);
+        String howLongDelayed   = input.getStringByField(ParseCSV.HOW_LONG_DELAYED);
+        String occurredOn       = input.getStringByField(ParseCSV.OCCURRED_ON);
+        String timestamp        = input.getStringByField(ParseCSV.F_TIMESTAMP);
 
         String dTimestamp = null;
         try {
