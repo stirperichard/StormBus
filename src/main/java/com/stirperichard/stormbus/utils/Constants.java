@@ -26,7 +26,11 @@ public class Constants {
 	// how often a tick tuple will be sent to our bolt
 	public static final int SECONDS_PER_TIME_UNIT = 1;
 	// mapping system time to time in tuples
-	public static final int TIME_UNIT_IN_SECONDS = 60;
+	public static final int TIME_UNIT_IN_SECONDS = 60 * 60;
+
+	public static final double Wt = 0.3;
+	public static final double Wm = 0.5;
+	public static final double Wo = 0.2;
 
 
 	//Dataset

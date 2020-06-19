@@ -2,23 +2,31 @@ package com.stirperichard.stormbus.entity;
 
 import com.stirperichard.stormbus.enums.BreakdownOrRunningLate;
 import com.stirperichard.stormbus.enums.Reason;
+import org.apache.storm.shade.org.joda.time.DateTime;
+import org.apache.storm.shade.org.joda.time.format.DateTimeFormat;
+import org.apache.storm.shade.org.joda.time.format.DateTimeFormatter;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-public class Bus implements Serializable {
+import static com.stirperichard.stormbus.utils.ParseTime.minutesDelayed;
+
+public class BusRide implements Serializable {
 
     private String schoolYear;
     private int busbreakdownID;
     private String runType;
     private String busNo;
     private String routeNumber;
-    private Reason reason;
+    public Reason reason;
     private String schoolsServiced;
-    private String occurredOn;
+    public String occurredOn;
     private String createdOn;
-    private String boro;
-    private String busCompanyName;
-    private String howLongDelayed;
+    public String boro;
+    public String busCompanyName;
+    public String howLongDelayed;
     private int numerOfStudentsOnTheBus;
     private String hasContractorNotifiedSchool;
     private String hasContractorNotifiedParents;
@@ -196,6 +204,74 @@ public class Bus implements Serializable {
     public void setSchoolAgeOrPreK(String schoolAgeOrPreK) {
         this.schoolAgeOrPreK = schoolAgeOrPreK;
     }
+
+
+    public static BusRide parse(String line) throws ParseException {
+        BusRide br = new BusRide();
+
+        String[] tokens = line.split(";");
+
+        if (!tokens[5].isEmpty()){
+            //Aggiungo la Reason
+            br.reason = mappingReason(tokens[5]);
+        }
+
+        //Controllo la validità e aggiungo il valore della varibile Occurred_On (campo 7)
+        if (!tokens[7].isEmpty()){
+            br.occurredOn =  tokens[7];
+        }
+
+        //Controllo la validità e aggiungo il valore della varibile Boro (campo 9)
+        if (!tokens[9].isEmpty()){
+            br.boro = tokens[9];
+        }
+
+        if (!tokens[10].isEmpty()){
+            br.busCompanyName = tokens[10];
+        }
+
+
+        //Controllo la validità e aggiungo il valore della varibile How_Long_Delayed (campo 11)
+        if (!tokens[11].isEmpty()){
+            br.howLongDelayed = minutesDelayed(tokens[11]);
+        } else {
+            br.howLongDelayed = String.valueOf(0);
+        }
+
+
+        return br;
+    }
+
+
+    private static Reason mappingReason(String reason) {
+        switch (reason) {
+            case "Accident":
+                return Reason.ACCIDENT;
+            case "Delayed by School":
+                return Reason.DELAYED_BY_SCHOOL;
+            case "Flat Tire":
+                return Reason.FLAT_TIRE;
+            case "Heavy Traffic":
+                return Reason.HEAVY_TRAFFIC;
+            case "Mechanical Problem":
+                return Reason.MECHANICAL_PROBLEM;
+            case "Problem Run":
+                return Reason.PROBLEM_RUN;
+            case "Weather Condition":
+                return Reason.WEATHER_CONDITION;
+            case "Won't Start":
+                return Reason.WONT_START;
+            default:
+                return Reason.OTHER;
+        }
+    }
+
+
+    public DateTime getDateTime(){
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        return formatter.parseDateTime(occurredOn);
+    }
+
 
     @Override
     public String toString() {
