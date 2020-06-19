@@ -19,6 +19,14 @@ import java.util.Map;
 public class DataGenerator extends BaseRichSpout {
     private static final Logger LOG = LoggerFactory.getLogger(DataGenerator.class);
 
+    public static final String MSGID				= "MSGID";
+    public static final String BUS_BREAKDOWN_ID    	= "busBreakdownId";
+    public static final String REASON           	= "reason";
+    public static final String OCCURRED_ON 	        = "occurredOn";
+    public static final String BORO 	            = "boro";
+    public static final String BUS_COMPANY_NAME 	= "busCompanyName";
+    public static final String HOW_LONG_DELAYED 	= "howLongDelayed";
+
     public static final String PROFIT_STREAM_ID = "num";
     public static final String EMPTY_TAXIS_STREAM_ID = "den";
     boolean _feof;
@@ -36,7 +44,7 @@ public class DataGenerator extends BaseRichSpout {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        Fields fields = new Fields("Reason", "Occurred_On", "Boro", "Bus_Company_Name", "How_Long_Delayed");
+        Fields fields = new Fields(BUS_BREAKDOWN_ID, REASON, OCCURRED_ON, BORO, BUS_COMPANY_NAME, HOW_LONG_DELAYED);
         outputFieldsDeclarer.declareStream(PROFIT_STREAM_ID, fields);
     }
 
@@ -64,7 +72,7 @@ public class DataGenerator extends BaseRichSpout {
 
             if (line != null && !line.equals(header)) {
                 BusRide tr = BusRide.parse(line);
-                Values tuple = new Values(tr.reason.toString(), tr.occurredOn, tr.boro, tr.busCompanyName, tr.howLongDelayed);
+                Values tuple = new Values(tr.busbreakdownID, tr.reason.toString(), tr.occurredOn, tr.boro, tr.busCompanyName, tr.howLongDelayed);
 
                 long newTs = tr.getDateTime().getMillis();
                 if (lastTs > 0) {
