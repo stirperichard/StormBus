@@ -29,4 +29,8 @@ public class Constants {
 	public static final int TIME_UNIT_IN_SECONDS = 60;
 
 
+	//Dataset
+	public static final String dataset = "/home/richard/IdeaProjects/StormBus/src/main/resources/bus-breakdown-and-delays.csv";
+
+
 }

@@ -59,11 +59,11 @@ public class Main {
 
         builder.setBolt("computeCellID", new ComputeCellID())
                 .setNumTasks(numTasks)
-                .shuffleGrouping("filterByCoordinates");
+                .shuffleGrouping("ConvertDatetime");
 
         builder.setBolt("countByWindow", new CountByWindow())
                 .setNumTasks(numTasks)
-                .fieldsGrouping("computeCellID", new Fields(ComputeCellID.F_ROUTE))
+                .fieldsGrouping("ConvertDatetime", new Fields(ConvertDatetime.F_ROUTE))
                 .allGrouping("metronome", Metronome.S_METRONOME);
 */
 		/* Two operators that realize the top-10 ranking in two steps (typical design pattern):

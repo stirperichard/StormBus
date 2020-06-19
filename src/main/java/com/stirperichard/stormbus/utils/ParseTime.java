@@ -4,7 +4,7 @@ package com.stirperichard.stormbus.utils;
 public class ParseTime {
 
     //Converto la colonna non omogenea in soli interi [minutes] <- misura std di riferimento
-    public static String minutesDelayed(String delay) {
+    public static int minutesDelayed(String delay) {
 
         String[] delays;
         int newDelay = 0;
@@ -13,7 +13,7 @@ public class ParseTime {
         if (delay.isEmpty() || delay.equals("?") || delay.equals("!")){
             delay = String.valueOf(0);
             System.out.println("\u001B[31m" + delay + "\u001B[0m");
-            return delay;
+            return Integer.valueOf(delay);
         }
 
         //Cerco di rendere la colonna dei delay quanto più omogena possibile
@@ -48,7 +48,7 @@ public class ParseTime {
             if (delays[0].equals("1") && delays[1].contains("2")){
                 delay = String.valueOf(30);
                 System.out.println(delay);
-                return delay;
+                return Integer.valueOf(delay);
             }
 
             int i;
@@ -144,7 +144,7 @@ public class ParseTime {
         }
 
         System.out.println("\u001B[31m" + newDelay + "\u001B[0m");
-        return String.valueOf(newDelay);
+        return newDelay;
     }
 
     public static String checkEmpty(String s){
