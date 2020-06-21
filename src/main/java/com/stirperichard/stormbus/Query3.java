@@ -20,6 +20,10 @@ public class Query3 {
     public static String INPUT_FILE = "src/main/resources/dataset.csv";
     public static String OUTPUT_FILE = "result_query3.output";
 
+    int numTasks 			= 3;
+    int numTasksMetronome   = 1;  // each task of the metronome generate a flood of messages
+    int numTasksGlobalRank  = 1;
+
 
     public static void main(String[] args) throws Exception {
         // write your code here
@@ -48,7 +52,19 @@ public class Query3 {
         //Redis
         builder.setSpout("datasource", new DataGenerator(INPUT_FILE));
         //Parser
-        builder.setBolt("compute", new ComputeCompanyReasonWindowBasedTopology()
+        builder.setBolt("filterReason", new FilterReason())
+                .setNumTasks(numTasks)
+                .shuffleGrouping("datasource");
+
+        builder.setBolt("metronome", new Metronome())
+                .setNumTasks(numTasksMetronome)
+                .shuffleGrouping("filterReason");
+
+        builder.setBolt("computeScore", new ComputeScoreByWindow())
+                .setNumTasks(numTasks)
+                .allGrouping("metronome", Metronome.S_METRONOME);
+        /*
+        builder.setBolt("compute", new FilterReason()
                         .withWindow(
                                 new BaseWindowedBolt.Duration(24, TimeUnit.SECONDS),
                                 new BaseWindowedBolt.Duration(4, TimeUnit.SECONDS)
@@ -60,6 +76,8 @@ public class Query3 {
                         DataGenerator.PROFIT_STREAM_ID,
                         new Fields("Bus_Company_Name")
                 );
+
+         */
 
 /*
         builder.setBolt("metronome", new Metronome())

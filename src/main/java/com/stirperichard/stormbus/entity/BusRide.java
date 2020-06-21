@@ -16,7 +16,7 @@ import static com.stirperichard.stormbus.utils.ParseTime.minutesDelayed;
 public class BusRide implements Serializable {
 
     private String schoolYear;
-    private int busbreakdownID;
+    public String busbreakdownID;
     private String runType;
     private String busNo;
     private String routeNumber;
@@ -45,11 +45,11 @@ public class BusRide implements Serializable {
         this.schoolYear = schoolYear;
     }
 
-    public int getBusbreakdownID() {
+    public String getBusbreakdownID() {
         return busbreakdownID;
     }
 
-    public void setBusbreakdownID(int busbreakdownID) {
+    public void setBusbreakdownID(String busbreakdownID) {
         this.busbreakdownID = busbreakdownID;
     }
 
@@ -211,6 +211,13 @@ public class BusRide implements Serializable {
 
         String[] tokens = line.split(";");
 
+
+        if (!tokens[1].isEmpty()){
+            //Aggiungo la Reason
+            br.busbreakdownID = tokens[1];
+        }
+
+
         if (!tokens[5].isEmpty()){
             //Aggiungo la Reason
             br.reason = mappingReason(tokens[5]);
@@ -233,7 +240,7 @@ public class BusRide implements Serializable {
 
         //Controllo la validità e aggiungo il valore della varibile How_Long_Delayed (campo 11)
         if (!tokens[11].isEmpty()){
-            br.howLongDelayed = minutesDelayed(tokens[11]);
+            br.howLongDelayed = String.valueOf(minutesDelayed(tokens[11]));
         } else {
             br.howLongDelayed = String.valueOf(0);
         }

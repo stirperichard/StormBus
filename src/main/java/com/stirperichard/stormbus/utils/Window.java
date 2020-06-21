@@ -41,18 +41,14 @@ public class Window {
 		int cumulativeValue = 0;
 		
 		for (int i = 0; i < positions; i++){
-
 			cumulativeValue += moveForward();
-		
 		}
 		
 		return cumulativeValue;
 	}
 	
 	public void increment(){
-
 		increment(1);
-	
 	}
 	
 	public void increment(int value){
