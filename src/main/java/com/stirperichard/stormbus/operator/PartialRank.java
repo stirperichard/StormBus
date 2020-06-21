@@ -9,16 +9,22 @@ import org.apache.storm.tuple.Tuple;
 import java.util.Map;
 
 public class PartialRank extends BaseRichBolt {
+    private OutputCollector collector;
+
     public PartialRank(int i) {
     }
 
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-
+        this.collector = collector;
     }
 
     @Override
     public void execute(Tuple input) {
+
+
+
+
 
     }
 

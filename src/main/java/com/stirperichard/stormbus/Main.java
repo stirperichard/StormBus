@@ -1,11 +1,15 @@
 package com.stirperichard.stormbus;
 
+import com.stirperichard.stormbus.operator.CountByWindowQuery1;
+import com.stirperichard.stormbus.operator.Metronome;
+import com.stirperichard.stormbus.operator.ParseCSV;
 import com.stirperichard.stormbus.operator.RedisSpout;
 import com.stirperichard.stormbus.utils.TConf;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.tuple.Fields;
 
 public class Main {
 
@@ -42,30 +46,24 @@ public class Main {
 
         //Redis
         builder.setSpout("datasource", new RedisSpout(redisUrl, redisPort));
-/*
+
         //Parser
-        builder.setBolt("parser", new ParseCSVQuery1())
+        builder.setBolt("parser", new ParseCSV())
                 .setNumTasks(numTasks)
-                .shuffleGrouping("datasource");
+                .allGrouping("datasource");
 
-        //Filter
-        builder.setBolt("convertDateTime", new ConvertDatetime())
-                .setNumTasks(numTasks)
-                .shuffleGrouping("parser");
 
+        //Metronome
         builder.setBolt("metronome", new Metronome())
                 .setNumTasks(numTasksMetronome)
-                .shuffleGrouping("filterByCoordinates");
+                .allGrouping("parser");
 
-        builder.setBolt("computeCellID", new ComputeCellID())
+        //Count by window
+        builder.setBolt("countByWindow", new CountByWindowQuery1())
                 .setNumTasks(numTasks)
-                .shuffleGrouping("ConvertDatetime");
-
-        builder.setBolt("countByWindow", new CountByWindow())
-                .setNumTasks(numTasks)
-                .fieldsGrouping("ConvertDatetime", new Fields(ConvertDatetime.F_ROUTE))
+                .fieldsGrouping("parser", new Fields(ParseCSV.BORO))
                 .allGrouping("metronome", Metronome.S_METRONOME);
-*/
+
 		/* Two operators that realize the top-10 ranking in two steps (typical design pattern):
         PartialRank can be distributed and parallelized,
         whereas TotalRank is centralized and computes the global ranking */

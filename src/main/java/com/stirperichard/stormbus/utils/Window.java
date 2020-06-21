@@ -57,7 +57,7 @@ public class Window {
 	
 	public void increment(int value){
 		
-		timeframes[currentIndex]= timeframes[currentIndex] + value;
+		timeframes[currentIndex] = timeframes[currentIndex] + value;
 		
 		estimatedTotal += value;
 		
@@ -85,11 +85,13 @@ public class Window {
 	public int getEstimatedTotal() {
 		return estimatedTotal;
 	}
-	
+
+
 	public int computeTotal(){
 		
 		int total = 0;
-		for (int i = 0; i < timeframes.length; i++)
+		int i;
+		for ( i = 0; i < timeframes.length; i++)
 			total += timeframes[i];
 		return total;
 		

@@ -37,4 +37,12 @@ public class Constants {
 	public static final String dataset = "/home/richard/IdeaProjects/StormBus/src/main/resources/bus-breakdown-and-delays.csv";
 
 
+
+	public static final long MILLIS_HOUR = 1000*60*60;
+	public static final long MILLIS_DAY = MILLIS_HOUR*24;
+	public static final long MILLIS_WEEK = MILLIS_DAY*7;
+	public static long MILLIS_MONTH;
+	public static int WINDOWS_SIZE;
+
+
 }
