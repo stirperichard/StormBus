@@ -6,6 +6,7 @@ public class Window {
 	int currentIndex; 
 	int size; 
 	int estimatedTotal;
+	int counter; //Conta il numero di eventi delay
 	
 	public Window(int size) {
 		
@@ -13,6 +14,7 @@ public class Window {
 		this.size = size; 
 		this.currentIndex = 0;
 		this.estimatedTotal = 0;
+		this.counter = 0;
 		
 		for (int i = 0; i < size; i++)
 			timeframes[i] = 0;
@@ -56,6 +58,8 @@ public class Window {
 		timeframes[currentIndex] = timeframes[currentIndex] + value;
 		
 		estimatedTotal += value;
+
+		counter++;
 		
 	}
 
@@ -82,6 +86,9 @@ public class Window {
 		return estimatedTotal;
 	}
 
+	public int getCounter() {
+		return counter;
+	}
 
 	public int computeTotal(){
 		

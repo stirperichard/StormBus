@@ -12,6 +12,7 @@ import org.apache.storm.tuple.Values;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ public class ParseCSV extends BaseRichBolt {
     public static final String BUS_COMPANY_NAME    	= "busCompanyName";
     public static final String F_TIMESTAMP 	        = "timestamp";
     public static final String OCCURRED_ON_MILLIS   = "occurred_on_millis";
+    public static final String DAY_IN_MONTH         = "day_in_month";
 
     private OutputCollector collector;
     private SimpleDateFormat sdf;
@@ -40,9 +42,10 @@ public class ParseCSV extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
-        String rawData 	= input.getStringByField(RedisSpout.F_DATA);
-        String msgId 	= input.getStringByField(RedisSpout.F_MSGID);
-        String timestamp = input.getStringByField(RedisSpout.F_TIMESTAMP);
+        String rawData 	    = input.getStringByField(RedisSpout.F_DATA);
+        String msgId 	    = input.getStringByField(RedisSpout.F_MSGID);
+        long timestamp      = input.getLongByField(RedisSpout.F_TIMESTAMP);
+
 
         /* Do NOT emit if the EOF has been reached */
         if (rawData == null || rawData.equals(Constants.REDIS_EOF)){
@@ -87,7 +90,7 @@ public class ParseCSV extends BaseRichBolt {
             values.add(minutesDelayed(data[11]));
         }
 
-        //Inserisco l'occurredOn in millis
+        //Inserisco l'occurredOn in millisecondi
         Date dDate;
         try {
             dDate = sdf.parse(data[7]);
@@ -99,6 +102,13 @@ public class ParseCSV extends BaseRichBolt {
             return;
         }
 
+        //Aggiungo i giorni nel mese.
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(dDate.getTime());
+        int dayMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        values.add(dayMonth);
+
+
         //Setto la variabile timestamp
         values.add(timestamp);
 
@@ -109,7 +119,7 @@ public class ParseCSV extends BaseRichBolt {
 
 
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields(F_MSGID, REASON, OCCURRED_ON, BORO, BUS_COMPANY_NAME, HOW_LONG_DELAYED, OCCURRED_ON_MILLIS, F_TIMESTAMP));
+        outputFieldsDeclarer.declare(new Fields(F_MSGID, REASON, OCCURRED_ON, BORO, BUS_COMPANY_NAME, HOW_LONG_DELAYED, OCCURRED_ON_MILLIS, DAY_IN_MONTH, F_TIMESTAMP));
     }
 
     public static Reason mappingReason(String reason) {

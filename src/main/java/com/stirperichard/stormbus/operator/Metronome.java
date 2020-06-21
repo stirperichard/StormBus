@@ -8,7 +8,6 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 
-import java.util.Calendar;
 import java.util.Map;
 
 import static com.stirperichard.stormbus.utils.Constants.*;
@@ -25,7 +24,7 @@ public class Metronome extends BaseRichBolt {
     public static final String METRONOME_D          = "metronome_day";
     public static final String METRONOME_W          = "metronome_week";
     public static final String METRONOME_M          = "metronome_month";
-    public static final String DAY_PER_MONTH        = "day_per_month";
+    public static final String DAY_IN_MONTH         = "day_in_month";
 
     private long currentTime;
     private OutputCollector collector;
@@ -56,13 +55,8 @@ public class Metronome extends BaseRichBolt {
         String SMsgId                 = input.getStringByField(ParseCSV.F_MSGID);
         String occurredOn             = input.getStringByField(ParseCSV.OCCURRED_ON);
         long occurredOnMillis         = input.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
-        String timestamp              = input.getStringByField(ParseCSV.F_TIMESTAMP);
-
-        int day;
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(occurredOnMillis);
-        int dayMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        long timestamp                = input.getLongByField(ParseCSV.F_TIMESTAMP);
+        int dayMonth                  = input.getIntegerByField(ParseCSV.DAY_IN_MONTH);
 
         MILLIS_MONTH = dayMonth * 24 * 60 * 60 * 1000;
 
@@ -133,7 +127,7 @@ public class Metronome extends BaseRichBolt {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
 
-        outputFieldsDeclarer.declareStream(S_METRONOME, new Fields(F_MSGID, DAY_PER_MONTH, OCCURREDON_MILLIS, OCCURRED_ON, F_TIMESTAMP));
+        outputFieldsDeclarer.declareStream(S_METRONOME, new Fields(F_MSGID, DAY_IN_MONTH, OCCURREDON_MILLIS, OCCURRED_ON, F_TIMESTAMP));
 
     }
 }

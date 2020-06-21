@@ -11,14 +11,7 @@ import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 
-public class Main {
-
-    public static final int TOP_N = 10;
-    public static int PROFIT_WINDOW = 15 * 60; // in seconds
-    public static int EMPTY_WINDOW = 30 * 60; // in seconds
-    public static String OUTPUT_FILE = "rankings.output";
-
-
+public class Query1 {
 
     public static void main(String[] args) throws Exception {
 	// write your code here
@@ -52,7 +45,6 @@ public class Main {
                 .setNumTasks(numTasks)
                 .allGrouping("datasource");
 
-
         //Metronome
         builder.setBolt("metronome", new Metronome())
                 .setNumTasks(numTasksMetronome)
@@ -76,9 +68,11 @@ public class Main {
                 .setNumTasks(numTasksGlobalRank)
                 .shuffleGrouping("partialRank");
 
-        builder.setBolt("rankings", new RankingBolt(TOP_N)).globalGrouping("profitability");
+        builder.setBolt("rankings", new RankingBolt(TOP_N))
+                .globalGrouping("profitability");
 
-        builder.setBolt("to_file", new DataWriter(OUTPUT_FILE)).globalGrouping("rankings");
+        builder.setBolt("to_file", new DataWriter(OUTPUT_FILE))
+                .globalGrouping("rankings");
 */
         StormTopology stormTopology = builder.createTopology();
 
@@ -103,13 +97,7 @@ public class Main {
         // cluster
         //StormSubmitter.submitTopology(args[0], conf, stormTopology);
         LocalCluster cluster = new LocalCluster();
-        cluster.submitTopology("test", conf, builder.createTopology());
-        /*
-        Utils.sleep(10000);
-        cluster.killTopology("test");
-        cluster.shutdown();
-
-         */
+        cluster.submitTopology("test", conf, stormTopology);
 
     }
 }
