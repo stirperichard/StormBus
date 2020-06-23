@@ -1,6 +1,7 @@
 package com.stirperichard.stormbus.operator;
 
 import com.stirperichard.stormbus.entity.ReasonsCount;
+import com.stirperichard.stormbus.utils.Constants;
 import com.stirperichard.stormbus.utils.Window;
 import com.stirperichard.stormbus.utils.WindowQ3;
 import org.apache.storm.task.OutputCollector;
@@ -27,7 +28,7 @@ public class ComputeScoreByWindow extends BaseRichBolt {
 
 
 	private static final int WINDOW_SIZE = 24 * 60;
-	private static final double MIN_IN_MS = 60 * 1000;
+	private static final double MIN_IN_MS = 60 * 60 * 1000;
 	private static final long serialVersionUID = 1L;
 	private OutputCollector collector;
 
@@ -44,7 +45,7 @@ public class ComputeScoreByWindow extends BaseRichBolt {
 
 		this.collector = outputCollector;
 		this.latestCompletedTimeframe = 0;
-		this.windowPerCompany = new HashMap<String, WindowQ3>();
+		this.windowPerCompany = new HashMap<>();
 
 	}
 
@@ -86,18 +87,26 @@ public class ComputeScoreByWindow extends BaseRichBolt {
 
 				/* Reduce memory by removing windows with no data */
 				ReasonsCount zero = new ReasonsCount(0, 0, 0);
-				if (w.getEstimatedTotal().equals(zero))
+				//if (w.getEstimatedTotal().equals(zero))
 					expiredReasons.add(r);
 
 				Values v = new Values();
 				v.add(msgId);
 				v.add(r);
-				v.add(rCount.getHEAVY_TRAFFIC());
-				v.add(rCount.getMECHANICAL_PROBLEM());
-				v.add(rCount.getOTHER());
+
+				double score = Constants.WT * rCount.getHEAVY_TRAFFIC() +
+						Constants.WM * rCount.getMECHANICAL_PROBLEM() + Constants.WO * rCount.getOTHER();
+
+				//v.add(rCount.getHEAVY_TRAFFIC());
+				//v.add(rCount.getMECHANICAL_PROBLEM());
+				//v.add(rCount.getOTHER());
+				v.add(score);
+
 				v.add(time);
 
 				collector.emit(v);
+				System.out.println("\033[0;35m" + v + "\u001B[0m");
+
 			}
 
 			/* Reduce memory by removing windows with no data */
@@ -106,6 +115,7 @@ public class ComputeScoreByWindow extends BaseRichBolt {
 			}
 
 			this.latestCompletedTimeframe = latestTimeframe;
+			System.out.println("\033[0;32m" + "Tick Tuple" + "\u001B[0m");
 
 		}
 
@@ -147,6 +157,7 @@ public class ComputeScoreByWindow extends BaseRichBolt {
 				if (w.getEstimatedTotal().equals(zero))
 					expiredReasons.add(r);
 
+				/*
 				Values v = new Values();
 				v.add(msgId);
 				v.add(r);
@@ -156,6 +167,8 @@ public class ComputeScoreByWindow extends BaseRichBolt {
 				v.add(time);
 
 				collector.emit(v);
+
+				 */
 
 			}
 
@@ -175,11 +188,18 @@ public class ComputeScoreByWindow extends BaseRichBolt {
 			windowPerCompany.put(busCompanyName, w);
 		}
 
-		w.increment(getReasonCount(reason, Integer.parseInt(howLongDelayed)));
+		// Codice bruttissimo, da cambiare
+		if(Integer.parseInt(howLongDelayed) <= 30){
+			w.increment(addReasonCount(reason));
+		}else{
+			w.increment(addReasonCount(reason));
+			w.increment(addReasonCount(reason));
+		}
 
 		/* Retrieve route frequency in the last 30 mins */
 		ReasonsCount count = w.getEstimatedTotal();
 
+		/*
 		Values values = new Values();
 		values.add(msgId);
 		values.add(busCompanyName);
@@ -188,10 +208,10 @@ public class ComputeScoreByWindow extends BaseRichBolt {
 		values.add(count.getOTHER());
 		values.add(time);
 
-		System.out.println("\u001B[31m" + values + "\u001B[0m");
+		System.out.println("\033[0;33m" + values + "\u001B[0m");
 		collector.emit(values);
 		collector.ack(tuple);
-
+		*/
 	}
 
 	private long roundToCompletedMinute(String timestamp) {
@@ -206,15 +226,15 @@ public class ComputeScoreByWindow extends BaseRichBolt {
 	}
 
 
-	private ReasonsCount getReasonCount(String reason, int delay) {
+	private ReasonsCount addReasonCount(String reason) {
 		ReasonsCount zero = new ReasonsCount(0, 0, 0);
 
 		if (reason.equals("Heavy Traffic")) {
-			zero.setHEAVY_TRAFFIC(delay);
+			zero.setHEAVY_TRAFFIC(1);
 		} else if (reason.equals("Mechanical Problem")) {
-			zero.setMECHANICAL_PROBLEM(delay);
+			zero.setMECHANICAL_PROBLEM(1);
 		} else
-			zero.setOTHER(delay);
+			zero.setOTHER(1);
 
 		return zero;
 	}
@@ -222,7 +242,9 @@ public class ComputeScoreByWindow extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
+		//outputFieldsDeclarer.declare(new Fields(F_MSGID, F_PICKUP_DATATIME, F_DROPOFF_DATATIME, F_ROUTE, F_COUNT, F_TIMESTAMP));
 		outputFieldsDeclarer.declare(new Fields(F_MSGID, F_PICKUP_DATATIME, F_DROPOFF_DATATIME, F_ROUTE, F_COUNT, F_TIMESTAMP));
+
 	}
 
 }

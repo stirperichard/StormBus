@@ -74,7 +74,6 @@ public class Window {
 			
 			if (i < (timeframes.length - 1))
 				s += ", ";
-			
 		}
 		
 		s += "]";

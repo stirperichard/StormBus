@@ -19,7 +19,6 @@ public class WindowQ3 {
 		this.currentIndex = 0;
 		estimatedTotal = new ReasonsCount(0, 0, 0);
 
-
 		for (int i = 0; i < size; i++) {
 			ReasonsCount estimatedTotal = new ReasonsCount(0, 0, 0);
 			timeframes.add(estimatedTotal);
@@ -34,8 +33,8 @@ public class WindowQ3 {
 
 		ReasonsCount value = timeframes.get(lastTimeframeIndex);
 		//timeframes[lastTimeframeIndex] = 0;
-		
-		estimatedTotal.subtract(value);
+
+		estimatedTotal = estimatedTotal.subtract(value);
 		
 		/* Move forward the current index */
 		currentIndex = (currentIndex + 1) % size;
@@ -49,7 +48,7 @@ public class WindowQ3 {
 		ReasonsCount cumulativeValue = new ReasonsCount(0, 0, 0);
 		
 		for (int i = 0; i < positions; i++){
-			cumulativeValue.sum(moveForward());
+			cumulativeValue = cumulativeValue.sum(moveForward());
 		}
 		
 		return cumulativeValue;
@@ -59,8 +58,7 @@ public class WindowQ3 {
 	public void increment(ReasonsCount value){
 		
 		timeframes.set(currentIndex, timeframes.get(currentIndex).sum(value));
-		
-		estimatedTotal.sum(value);
+		estimatedTotal = estimatedTotal.sum(value);
 		
 	}
 

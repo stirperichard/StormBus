@@ -1,6 +1,10 @@
 package com.stirperichard.stormbus.utils;
 
+import java.text.SimpleDateFormat;
+
 public class Constants {
+
+	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
 	//Constant for Redis
 	public static final String REDIS_DATA		= "data";
@@ -24,9 +28,9 @@ public class Constants {
 
 
 	// how often a tick tuple will be sent to our bolt
-	public static final int SECONDS_PER_TIME_UNIT = 1;
+	public static final int SECONDS_PER_TIME_UNIT = 3;
 	// mapping system time to time in tuples
-	public static final int TIME_UNIT_IN_SECONDS = 60 * 60;
+	public static final int TIME_UNIT_IN_SECONDS = 3 * 60 * 60;
 
 	public static final double Wt = 0.3;
 	public static final double Wm = 0.5;
