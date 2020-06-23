@@ -16,12 +16,13 @@ import java.util.Map;
  */
 public class DataWriter extends BaseRichBolt {
 
-    private String outputFileName;
+    private String outputPath;
     private BufferedWriter writer;
     private OutputCollector collector;
+    private String outputFile;
 
-    public DataWriter(String outputFileName) {
-        this.outputFileName = outputFileName;
+    public DataWriter(String outputPath) {
+        this.outputPath = outputPath;
     }
 
     @Override
@@ -29,12 +30,12 @@ public class DataWriter extends BaseRichBolt {
         try {
             this.writer = new BufferedWriter(
                     new OutputStreamWriter(
-                            new FileOutputStream(outputFileName)
+                            new FileOutputStream(outputPath)
                     )
             );
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            throw new RuntimeException("Error in opening " + outputFileName);
+            throw new RuntimeException("Error in opening " + outputPath);
         }
 
         this.collector = outputCollector;
@@ -48,7 +49,7 @@ public class DataWriter extends BaseRichBolt {
             writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Error in writing to " + outputFileName);
+            throw new RuntimeException("Error in writing to " + outputPath);
         }
 
         collector.ack(tuple);

@@ -165,11 +165,12 @@ public class TimeUtils {
     }
 
     //RETRIEVE DATA FUNCTION
-    public static Date retriveDataFromMillis(long timestamp){
+    public static String retriveDataFromMillis(long timestamp){
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy'T'HH:mm:ss");
         Timestamp stamp = new Timestamp(timestamp);
         Date date = new Date(stamp.getTime());
-        System.out.println(date);
-        return date;
+        String date_final = sdf.format(date);
+        return date_final;
     }
 
 }

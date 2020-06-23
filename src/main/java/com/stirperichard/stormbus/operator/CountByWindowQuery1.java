@@ -323,6 +323,8 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                 int elapsedHour = (int) Math.ceil((latestTimeframeHour - this.latestCompletedTimeframeHour) / (MILLIS_HOUR));
                 List<String> expiredRoutes = new ArrayList<>();
 
+                System.out.println("INIZIO DELLA FINESTRA TUMBLING " + TimeUtils.roundToCompletedHour(time));
+
                 for (String r : map_hour.keySet()){
 
                     Window w = map_hour.get(r);
@@ -330,7 +332,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                         continue;
                     }
 
-                    long delayPerBoroPerHour = w.getEstimatedTotal();
+                    float delayPerBoroPerHour = w.getEstimatedTotal() / w.getCounter();
 
                     w.moveForward(elapsedHour);
 
@@ -342,6 +344,8 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     v.add(r);
                     v.add(delayPerBoroPerHour);
                     v.add(time);
+
+                    System.out.println("EVENT OCCURRED AT:" + TimeUtils.retriveDataFromMillis(time) + " BORO: " + r + " AVG BORO PER HOUR: " + delayPerBoroPerHour);
 
                     collector.emit(HOUR, v);
                 }
@@ -399,6 +403,8 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     v.add(r);
                     v.add(avgPerBoroPerDay);
                     v.add(time);
+
+                    System.out.println("EVENT OCCURRED AT:" + occurredOn + " BORO: " + r + " AVG BORO PER DAY: " + avgPerBoroPerDay);
 
                     collector.emit(DAY, v);
                 }

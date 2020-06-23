@@ -20,7 +20,6 @@ public class Query1 {
         int redisPort 			= config.getInteger(TConf.REDIS_PORT);
         int numTasks 			= config.getInteger(TConf.NUM_TASKS);
         int numTasksMetronome   = 1;  // each task of the metronome generate a flood of messages
-        int numTasksGlobalRank  = 1;
         String rabbitMqHost 	= config.getString(TConf.RABBITMQ_HOST);
         String rabbitMqUsername = config.getString(TConf.RABBITMQ_USERNAME);
         String rabbitMqPassword	= config.getString(TConf.RABBITMQ_PASSWORD);
@@ -35,7 +34,7 @@ public class Query1 {
 
 
 
-        /* Build topology */
+        // Build topology
         TopologyBuilder builder = new TopologyBuilder();
 
         //Redis
@@ -57,25 +56,26 @@ public class Query1 {
                 .allGrouping("parser")
                 .allGrouping("metronome", Metronome.S_METRONOME);
 
-
+        /*
         builder.setBolt("to_file", new DataWriter(OUTPUT_PATH))
                 .globalGrouping("countByWindow");
+         */
 
         StormTopology stormTopology = builder.createTopology();
 
-        /* Create configurations */
+        // Create configurations
         Config conf = new Config();
         conf.setDebug(false);
-        /* number of workers to create for current topology */
+        // number of workers to create for current topology
         conf.setNumWorkers(3);
 
 
-        /* Update numWorkers using command-line received parameters */
+        // Update numWorkers using command-line received parameters
         if (args.length == 2){
             try {
                 if (args[1] != null) {
                     int numWorkers = Integer.parseInt(args[1]);
-                    /* number of workers to create for current topology */
+                    // number of workers to create for current topology
                     conf.setNumWorkers(numWorkers);
                     StormSubmitter.submitTopology(args[0], conf, stormTopology);
                     System.out.println("Number of workers to generate for current topology set to: " + numWorkers);
