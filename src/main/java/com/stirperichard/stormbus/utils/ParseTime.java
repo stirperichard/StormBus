@@ -11,9 +11,7 @@ public class ParseTime {
 
         //Se è vuota o contiene "?", assegno 0 di default
         if (delay.isEmpty() || delay.equals("?") || delay.equals("!")){
-            delay = String.valueOf(0);
-            System.out.println("\u001B[31m" + delay + "\u001B[0m");
-            return Integer.valueOf(delay);
+            return 0;
         }
 
         //Cerco di rendere la colonna dei delay quanto più omogena possibile
@@ -47,7 +45,6 @@ public class ParseTime {
 
             if (delays[0].equals("1") && delays[1].contains("2")){
                 delay = String.valueOf(30);
-                System.out.println(delay);
                 return Integer.valueOf(delay);
             }
 
@@ -143,7 +140,6 @@ public class ParseTime {
             }
         }
 
-        System.out.println("\u001B[31m" + newDelay + "\u001B[0m");
         return newDelay;
     }
 

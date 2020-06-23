@@ -1,6 +1,5 @@
 package com.stirperichard.stormbus.operator;
 
-import com.stirperichard.stormbus.entity.ReasonsCount;
 import com.stirperichard.stormbus.utils.Window;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -72,7 +71,7 @@ public class CountByWindowQuery3 extends BaseRichBolt {
     
 		String msgId 			= tuple.getStringByField(Metronome.F_MSGID);
 		String reason 			= tuple.getStringByField(DataGenerator.REASON);
-		String time		 		= tuple.getStringByField(Metronome.F_TIME);
+		String time		 		= tuple.getStringByField(MetronomeQuery3.F_TIME);
 		String busCompanyName 	= tuple.getStringByField(DataGenerator.BUS_COMPANY_NAME);
 		String howLongDelayed 	= tuple.getStringByField(DataGenerator.HOW_LONG_DELAYED);
 
@@ -126,7 +125,7 @@ public class CountByWindowQuery3 extends BaseRichBolt {
     	
 		String msgId 			= tuple.getStringByField(Metronome.F_MSGID);
 		String reason 			= tuple.getStringByField(DataGenerator.REASON);
-		String time		 		= tuple.getStringByField(Metronome.F_TIME);
+		String time		 		= tuple.getStringByField(MetronomeQuery3.F_TIME);
 		String boro				= tuple.getStringByField(DataGenerator.BORO);
 		String busCompanyName 	= tuple.getStringByField(DataGenerator.BUS_COMPANY_NAME);
 		String howLongDelayed 		= tuple.getStringByField(DataGenerator.HOW_LONG_DELAYED);

@@ -1,6 +1,5 @@
 package com.stirperichard.stormbus.operator;
 
-import com.stirperichard.stormbus.utils.TimeUtils;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -51,7 +50,7 @@ public class MetronomeQuery3 extends BaseRichBolt {
 
             this.latestMsgId = msgId;
             //this.currentTime = time;
-            this.currentTime = TimeUtils.addHours(occurredOn, 24);
+            //this.currentTime = TimeUtils.addHours(occurredOn, 24);
 
 
             Values values = new Values();

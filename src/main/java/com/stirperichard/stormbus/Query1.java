@@ -1,17 +1,19 @@
 package com.stirperichard.stormbus;
 
 import com.stirperichard.stormbus.operator.CountByWindowQuery1;
+import com.stirperichard.stormbus.operator.DataGeneratorQ1;
 import com.stirperichard.stormbus.operator.Metronome;
 import com.stirperichard.stormbus.operator.ParseCSV;
-import com.stirperichard.stormbus.operator.RedisSpout;
 import com.stirperichard.stormbus.utils.TConf;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
+import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.tuple.Fields;
 
 public class Query1 {
+
+    public static String INPUT_FILE = "src/main/resources/dataset.csv";
 
     public static void main(String[] args) throws Exception {
 	// write your code here
@@ -24,6 +26,7 @@ public class Query1 {
         String rabbitMqHost 	= config.getString(TConf.RABBITMQ_HOST);
         String rabbitMqUsername = config.getString(TConf.RABBITMQ_USERNAME);
         String rabbitMqPassword	= config.getString(TConf.RABBITMQ_PASSWORD);
+
 
         System.out.println("===================================================== ");
         System.out.println("Configuration:");
@@ -38,7 +41,7 @@ public class Query1 {
         TopologyBuilder builder = new TopologyBuilder();
 
         //Redis
-        builder.setSpout("datasource", new RedisSpout(redisUrl, redisPort));
+        builder.setSpout("datasource", new DataGeneratorQ1(INPUT_FILE));
 
         //Parser
         builder.setBolt("parser", new ParseCSV())
@@ -53,8 +56,9 @@ public class Query1 {
         //Count by window
         builder.setBolt("countByWindow", new CountByWindowQuery1())
                 .setNumTasks(numTasks)
-                .fieldsGrouping("parser", new Fields(ParseCSV.BORO))
+                .allGrouping("parser")
                 .allGrouping("metronome", Metronome.S_METRONOME);
+
 
 		/* Two operators that realize the top-10 ranking in two steps (typical design pattern):
         PartialRank can be distributed and parallelized,
@@ -85,19 +89,21 @@ public class Query1 {
 
         /* Update numWorkers using command-line received parameters */
         if (args.length == 2){
-            try{
-                if (args[1] != null){
+            try {
+                if (args[1] != null) {
                     int numWorkers = Integer.parseInt(args[1]);
+                    /* number of workers to create for current topology */
                     conf.setNumWorkers(numWorkers);
+                    StormSubmitter.submitTopology(args[0], conf, stormTopology);
                     System.out.println("Number of workers to generate for current topology set to: " + numWorkers);
                 }
-            } catch (NumberFormatException nf){}
+            } catch (NumberFormatException ignored) {
+            }
+        } else {
+            // cluster
+            //StormSubmitter.submitTopology(args[0], conf, stormTopology);
+            LocalCluster cluster = new LocalCluster();
+            cluster.submitTopology("test", conf, stormTopology);
         }
-
-        // cluster
-        //StormSubmitter.submitTopology(args[0], conf, stormTopology);
-        LocalCluster cluster = new LocalCluster();
-        cluster.submitTopology("test", conf, stormTopology);
-
     }
 }

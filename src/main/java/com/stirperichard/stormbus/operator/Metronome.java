@@ -11,22 +11,25 @@ import org.apache.storm.tuple.Values;
 import java.util.Map;
 
 import static com.stirperichard.stormbus.utils.Constants.*;
+import static com.stirperichard.stormbus.utils.Constants.MILLIS_MONTH;
 
 
 public class Metronome extends BaseRichBolt {
 
-    public static final String S_METRONOME 			= "sMetronome";
-    public static final String F_MSGID				= "msgId";
+    public static final String S_METRONOME          = "sMetronome";
+    public static final String F_MSGID              = "msgId";
     public static final String OCCURREDON_MILLIS    = "time";
-    public static final String OCCURRED_ON       	= "occurredOn";
-    public static final String F_TIMESTAMP      	= "timestamp";
+    public static final String OCCURRED_ON          = "occurredOn";
     public static final String METRONOME_H          = "metronome_hour";
     public static final String METRONOME_D          = "metronome_day";
     public static final String METRONOME_W          = "metronome_week";
     public static final String METRONOME_M          = "metronome_month";
     public static final String DAY_IN_MONTH         = "day_in_month";
+    public static final String TYPE_OF_METRONOME    = "type";
+    public static final String METRONOME_ID         = "metronomeID";
 
-    private long currentTime;
+    public static int prevIDMetronome;
+
     private OutputCollector collector;
 
     private long elapsedTime_h;
@@ -34,15 +37,14 @@ public class Metronome extends BaseRichBolt {
     private long elapsedTime_w;
     private long elapsedTime_m;
 
+    private int metronomeID = 0;
 
-    public Metronome(){
-
+    public Metronome() {
     }
 
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector outputCollector) {
         this.collector = outputCollector;
-        this.currentTime = 0;
         this.elapsedTime_h = 0;
         this.elapsedTime_d = 0;
         this.elapsedTime_w = 0;
@@ -52,82 +54,94 @@ public class Metronome extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
 
-        String SMsgId                 = input.getStringByField(ParseCSV.F_MSGID);
-        String occurredOn             = input.getStringByField(ParseCSV.OCCURRED_ON);
-        long occurredOnMillis         = input.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
-        long timestamp                = input.getLongByField(ParseCSV.F_TIMESTAMP);
-        int dayMonth                  = input.getIntegerByField(ParseCSV.DAY_IN_MONTH);
+        int ID = input.getIntegerByField(ParseCSV.F_MSGID);
+        String occurredOn = input.getStringByField(ParseCSV.OCCURRED_ON);
+        long occurredOnMillis = input.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
+        int dayMonth = input.getIntegerByField(ParseCSV.DAY_IN_MONTH);
 
-        MILLIS_MONTH = dayMonth * 24 * 60 * 60 * 1000;
 
-        if (this.elapsedTime_h == 0)
-            this.elapsedTime_h = occurredOnMillis;
-        if (this.elapsedTime_d == 0)
-            this.elapsedTime_d = occurredOnMillis;
-        if (this.elapsedTime_w == 0)
-            this.elapsedTime_w = occurredOnMillis;
-        if (this.elapsedTime_m == 0)
-            this.elapsedTime_m = occurredOnMillis;
+        if(ID > prevIDMetronome){
 
-        else {
+            prevIDMetronome = ID;
+
+            MILLIS_MONTH = dayMonth * MILLIS_DAY;
+
+            if (this.elapsedTime_h == 0)
+                this.elapsedTime_h = occurredOnMillis;
+            if (this.elapsedTime_d == 0)
+                this.elapsedTime_d = occurredOnMillis;
+            if (this.elapsedTime_w == 0)
+                this.elapsedTime_w = occurredOnMillis;
+            if (this.elapsedTime_m == 0)
+                this.elapsedTime_m = occurredOnMillis;
+
+
             // Metronome sends tick every hour
             if (occurredOnMillis - this.elapsedTime_h >= MILLIS_HOUR) {
+                metronomeID++;
                 this.elapsedTime_h = 0;
                 Values values = new Values();
-                values.add(SMsgId);
+                values.add(METRONOME_H);
                 values.add(dayMonth);
                 values.add(occurredOnMillis);
                 values.add(occurredOn);
-                values.add(timestamp);
-                collector.emit(METRONOME_H, values);
+                values.add(metronomeID);
+                collector.emit(S_METRONOME, values);
+                System.out.println("\u001B[33m" + "METRONOME HOUR" + "ID METRONOME: " + metronomeID + "\u001B[0m");
             }
 
             // Metronome sends tick every day
             if (occurredOnMillis - this.elapsedTime_d >= MILLIS_DAY) {
+                metronomeID++;
                 this.elapsedTime_d = 0;
                 Values values = new Values();
-                values.add(SMsgId);
+                values.add(METRONOME_D);
                 values.add(dayMonth);
                 values.add(occurredOnMillis);
                 values.add(occurredOn);
-                values.add(timestamp);
-                collector.emit(METRONOME_D, values);
+                values.add(metronomeID);
+                collector.emit(S_METRONOME, values);
+                System.out.println("\u001B[33m" + "METRONOME DAY" + "\u001B[0m");
             }
 
             // Metronome sends tick every week
             if (occurredOnMillis - this.elapsedTime_w >= MILLIS_WEEK) {
+                metronomeID++;
                 this.elapsedTime_w = 0;
                 Values values = new Values();
-                values.add(SMsgId);
+                values.add(METRONOME_W);
                 values.add(dayMonth);
                 values.add(occurredOnMillis);
                 values.add(occurredOn);
-                values.add(timestamp);
-                collector.emit(METRONOME_W, values);
+                values.add(metronomeID);
+                collector.emit(S_METRONOME, values);
+                System.out.println("\u001B[33m" + "METRONOME WEEK" + "\u001B[0m");
             }
 
             // Metronome sends tick every month
             if (occurredOnMillis - this.elapsedTime_m >= MILLIS_MONTH) {
+                metronomeID++;
                 this.elapsedTime_m = 0;
                 Values values = new Values();
-                values.add(SMsgId);
+                values.add(METRONOME_M);
                 values.add(dayMonth);
                 values.add(occurredOnMillis);
                 values.add(occurredOn);
-                values.add(timestamp);
-                collector.emit(METRONOME_M, values);
+                values.add(metronomeID);
+                collector.emit(S_METRONOME, values);
+                System.out.println("\u001B[33m" + "METRONOME MONTH" + "\u001B[0m");
             }
 
+            collector.ack(input);
         }
 
-        collector.ack(input);
     }
 
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
 
-        outputFieldsDeclarer.declareStream(S_METRONOME, new Fields(F_MSGID, DAY_IN_MONTH, OCCURREDON_MILLIS, OCCURRED_ON, F_TIMESTAMP));
+        outputFieldsDeclarer.declareStream(S_METRONOME, new Fields(TYPE_OF_METRONOME, DAY_IN_MONTH, OCCURREDON_MILLIS, OCCURRED_ON, METRONOME_ID));
 
     }
 }

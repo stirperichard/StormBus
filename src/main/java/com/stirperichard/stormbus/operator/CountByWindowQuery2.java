@@ -1,23 +1,6 @@
 package com.stirperichard.stormbus.operator;
 
-import com.stirperichard.stormbus.utils.TimeUtils;
-import com.stirperichard.stormbus.utils.Window;
-import org.apache.storm.task.OutputCollector;
-import org.apache.storm.task.TopologyContext;
-import org.apache.storm.topology.OutputFieldsDeclarer;
-import org.apache.storm.topology.base.BaseRichBolt;
-import org.apache.storm.tuple.Tuple;
-import org.apache.storm.tuple.Values;
-import org.javatuples.Pair;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.stirperichard.stormbus.utils.Constants.MILLIS_HOUR;
-
+/*
 public class CountByWindowQuery2 extends BaseRichBolt {
 
     public static final String F_MSGID				= "msgId";
@@ -26,19 +9,22 @@ public class CountByWindowQuery2 extends BaseRichBolt {
     public static final String BORO 	            = "boro";
     public static final String HOW_LONG_DELAYED 	= "howLongDelayed";
     public static final String F_TIMESTAMP      	= "timestamp";
-    public static final String DROPOFF_DATETIME    	= "dropoff_datetime";
+    public static final String REASON           	= "reason";
+    public static final String OCCURRED_ON_MILLIS   = "occurred_on_millis";
+
+    public static final String DAY              = "day";
+    public static final String WEEK             = "week";
 
     private static final long serialVersionUID = 1L;
     private OutputCollector collector;
 
-    private int day, month, year, hour, minutes, seconds;
+    private int hour;
 
-    private long latestCompletedTimeframe;
+    private long latestCompletedTimeframeDay, latestCompletedTimeframeWeek;
 
     private SimpleDateFormat sdf;
 
-
-    Map<Pair<String, Integer>, Window> map;
+    Map<String, Window> map_day_morning, map_day_afternoon, map_week_morning, map_week_afternoon;
 
 
     /*
@@ -50,14 +36,20 @@ public class CountByWindowQuery2 extends BaseRichBolt {
      * Le tre cause sonoordinate dalla pi`u frequente alla meno frequente.
      *
      */
-
+/*
+    public CountByWindowQuery2() {
+    }
 
     @Override
     public void prepare(@SuppressWarnings("rawtypes") Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
 
         this.collector=outputCollector;
-        this.latestCompletedTimeframe = 0;
-        this.map = new HashMap<Pair<String, Integer>, Window>();
+        this.latestCompletedTimeframeDay = 0;
+        this.latestCompletedTimeframeWeek = 0;
+        this.map_day_afternoon = new HashMap<String, Window>();
+        this.map_day_morning = new HashMap<String, Window>();
+        this.map_week_morning = new HashMap<String, Window>();
+        this.map_week_afternoon = new HashMap<String, Window>();
         this.sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     }
@@ -76,47 +68,92 @@ public class CountByWindowQuery2 extends BaseRichBolt {
     }
 
     private void handleMetronomeMessage(Tuple tuple){
-
+        String msgType          = tuple.getSourceStreamId();
         String msgId 			= tuple.getStringByField(Metronome.F_MSGID);
         Long time		 		= tuple.getLongByField(Metronome.OCCURREDON_MILLIS);
-        String timestamp 		= tuple.getStringByField(Metronome.F_TIMESTAMP);
+        long timestamp 		    = tuple.getLongByField(Metronome.F_TIMESTAMP);
+        String occurredOn   	= tuple.getStringByField(Metronome.OCCURRED_ON);
 
-        long latestTimeframe = TimeUtils.roundToCompletedHour(time);
+        if (msgType.equals(Metronome.METRONOME_D)) {
 
-        if (this.latestCompletedTimeframe < latestTimeframe){
+            long latestTimeframe = TimeUtils.roundToCompletedDay(time);
 
-            int elapsedHour = (int) Math.ceil((latestTimeframe - latestCompletedTimeframe) / (MILLIS_HOUR));
-            List<Pair<String, Integer>> expiredRoutes = new ArrayList<>();
+            if (this.latestCompletedTimeframeDay < latestTimeframe) {
 
-            for (Pair<String, Integer> r : map.keySet()){
+                int elapsedDay = (int) Math.ceil((latestTimeframe - latestCompletedTimeframeDay) / (MILLIS_HOUR * 24));
+                List<String> expiredRoutes = new ArrayList<>();
 
-                Window w = map.get(r);
-                if (w == null){
-                    continue;
+                for (String r : map_day.keySet()) {
+
+                    Window w = map_day.get(r);
+                    if (w == null) {
+                        continue;
+                    }
+
+                    w.moveForward(elapsedDay);
+                    int numberOfProblem = w.getCounter();
+
+                    /* Reduce memory by removing windows with no data */
+/*                    expiredRoutes.add(r);
+
+                    Values v = new Values();
+                    v.add(msgId);
+                    v.add(occurredOn);
+                    v.add(r);
+                    v.add(numberOfProblem);
+                    v.add(time);
+                    v.add(timestamp);
+                    collector.emit(DAY, v);
                 }
 
-                w.moveForward(elapsedHour);
-                long rCount = w.getEstimatedTotal();
+                /* Reduce memory by removing windows with no data */
+/*                for (String r : expiredRoutes) {
+                    map_day.remove(r);
+                }
+
+                this.latestCompletedTimeframeDay = latestTimeframe;
+            }
+        }
+
+        if (msgType.equals(Metronome.METRONOME_W)) {
+
+            long latestTimeframe = TimeUtils.lastWeek(time);
+
+            if (this.latestCompletedTimeframeWeek < latestTimeframe) {
+
+                int elapsedWeek = (int) Math.ceil((latestTimeframe - latestCompletedTimeframeWeek) / (MILLIS_HOUR * 24 * 7));
+                List<String> expiredRoutes = new ArrayList<>();
+
+                for (String r : map_week.keySet()) {
+
+                    Window w = map_week.get(r);
+                    if (w == null) {
+                        continue;
+                    }
+
+                    w.moveForward(elapsedWeek);
+                    int numberOfProblem = w.getCounter();
+
+                    /* Reduce memory by removing windows with no data */
+ /*                   expiredRoutes.add(r);
+
+                    Values v = new Values();
+                    v.add(msgId);
+                    v.add(occurredOn);
+                    v.add(r);
+                    v.add(numberOfProblem);
+                    v.add(time);
+                    v.add(timestamp);
+                    collector.emit(WEEK, v);
+                }
 
                 /* Reduce memory by removing windows with no data */
-                if (w.getEstimatedTotal() == 0)
-                    expiredRoutes.add(r);
+ /*               for (String r : expiredRoutes) {
+                    map_week.remove(r);
+                }
 
-                Values v = new Values();
-                v.add(r);
-                v.add(rCount);
-                v.add(time);
-                v.add(timestamp);
-                collector.emit(v);
+                this.latestCompletedTimeframeWeek = latestTimeframe;
             }
-
-            /* Reduce memory by removing windows with no data */
-            for (Pair<String, Integer> r : expiredRoutes){
-                map.remove(r);
-            }
-
-            this.latestCompletedTimeframe = latestTimeframe;
-
         }
 
         collector.ack(tuple);
@@ -125,87 +162,163 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
     private void handleBusData(Tuple tuple){
 
-        String msgId 			= tuple.getStringByField(ParseCSV.F_MSGID);
-        String boro 			= tuple.getStringByField(ParseCSV.BORO);
+        String source           = tuple.getSourceStreamId();
+        String reason 			= tuple.getStringByField(ParseCSV.REASON);
         String occurredOn   	= tuple.getStringByField(ParseCSV.OCCURRED_ON);
         int howLongDelayed	    = tuple.getIntegerByField(ParseCSV.HOW_LONG_DELAYED);
         long occurredOnMillis   = tuple.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
-        String timestamp 		= tuple.getStringByField(ParseCSV.F_TIMESTAMP);
 
-        long latestTimeframe = TimeUtils.roundToCompletedHour(occurredOnMillis);
+        long latestTimeframeDay     = TimeUtils.roundToCompletedDay(occurredOnMillis);
+        long latestTimeframeWeek    = TimeUtils.lastWeek(occurredOnMillis);
 
-        Pair<String, Integer> pair = Pair.with(boro, howLongDelayed);
+        if(this.latestCompletedTimeframeDay == 0){
+            this.latestCompletedTimeframeDay = TimeUtils.roundToCompletedHour(occurredOnMillis);
+        }
 
-        if (this.latestCompletedTimeframe < latestTimeframe){
+        if(this.latestCompletedTimeframeWeek == 0){
+            this.latestCompletedTimeframeWeek = TimeUtils.lastWeek(occurredOnMillis);
+        }
 
-            int elapsedMinutes = (int) Math.ceil((latestTimeframe - latestCompletedTimeframe) / (MILLIS_HOUR));
-            List<Pair<String, Integer>> expiredRoutes = new ArrayList<>();
+        if (latestTimeframeDay > this.latestCompletedTimeframeDay) {
+            int elapsedDay = (int) Math.ceil((latestTimeframeDay - this.latestCompletedTimeframeDay) / (MILLIS_HOUR * 24));
+            List<String> expiredRoutes = new ArrayList<>();
 
-            for (Pair<String, Integer> r : map.keySet()){
+            for (String r : map_day_morning.keySet()) {
 
-                Window w = map.get(r);
-                if (w == null){
+                Window w = map_day_morning.get(r);
+                if (w == null) {
                     continue;
                 }
 
-                w.moveForward(elapsedMinutes);
-                int rCount = w.getEstimatedTotal();
-
+                w.moveForward(elapsedDay);
+                long delayPerBoroPerDay = w.getEstimatedTotal();
+                long avgPerBoroPerDay = delayPerBoroPerDay/24;  //Sommatoria giornaliera diviso il numero di ore
 
                 /* Reduce memory by removing windows with no data */
-                if (w.getEstimatedTotal() == 0)
-                    expiredRoutes.add(r);
+/*                expiredRoutes.add(r);
 
                 Values v = new Values();
-                v.add(msgId);
-                v.add(boro);
                 v.add(occurredOn);
-                v.add(howLongDelayed);
                 v.add(r);
-                v.add(rCount);
-                v.add(timestamp);
+                v.add(avgPerBoroPerDay);
+                v.add(occurredOnMillis);
+                collector.emit(DAY, v);
+            }
 
-                collector.emit(v);
 
+            for (String r : map_day_afternoon.keySet()) {
+
+                Window w = map_day_afternoon.get(r);
+                if (w == null) {
+                    continue;
+                }
+
+                w.moveForward(elapsedDay);
+                long delayPerBoroPerDay = w.getEstimatedTotal();
+                long avgPerBoroPerDay = delayPerBoroPerDay/24;  //Sommatoria giornaliera diviso il numero di ore
+
+                /* Reduce memory by removing windows with no data */
+/*                expiredRoutes.add(r);
+
+                Values v = new Values();
+                v.add(occurredOn);
+                v.add(r);
+                v.add(avgPerBoroPerDay);
+                v.add(occurredOnMillis);
+                collector.emit(DAY, v);
             }
 
             /* Reduce memory by removing windows with no data */
-            for (Pair<String, Integer> r : expiredRoutes){
-                map.remove(r);
+/*            for (String r : expiredRoutes) {
+                map_day_afternoon.remove(r);
+                map_day_morning.remove(r);
             }
 
-            this.latestCompletedTimeframe = latestTimeframe;
 
+
+            this.latestCompletedTimeframeDay = latestTimeframeDay;
         }
 
+        if (latestTimeframeWeek > this.latestCompletedTimeframeWeek) {
+            int elapsedWeek = (int) Math.ceil((latestTimeframeWeek - this.latestCompletedTimeframeWeek) / (MILLIS_HOUR * 24 * 7));
+            List<String> expiredRoutes = new ArrayList<>();
 
-        /* Time has not moved forward. Update and emit count */
-        Window w = map.get(msgId);
-        if (w == null){
-            w = new Window(24);
-            map.put(pair, w);
+            for (String r : map_week.keySet()) {
+
+                Window w = map_week.get(r);
+                if (w == null) {
+                    continue;
+                }
+
+                w.moveForward(elapsedWeek);
+                long delayPerBoroPerWeek = w.getEstimatedTotal();
+                long avgDelayPerBoroPerWeek = delayPerBoroPerWeek / 7;    //Media settimanale in base giornaliera
+
+                /* Reduce memory by removing windows with no data */
+/*                expiredRoutes.add(r);
+
+                Values v = new Values();
+                v.add(occurredOn);
+                v.add(r);
+                v.add(avgDelayPerBoroPerWeek);
+                v.add(occurredOnMillis);
+                collector.emit(WEEK, v);
+            }
+
+            /* Reduce memory by removing windows with no data */
+/*            for (String r : expiredRoutes) {
+                map_week.remove(r);
+            }
+
+            this.latestCompletedTimeframeWeek = latestTimeframeWeek;
         }
 
-        w.increment();
+        /* Time has not moved forward. Update and emit count */  //WINDOW DAY
+/*        Window wDM = map_day_morning.get(reason);
+        if (wDM == null) {
+            wDM = new Window(1);
+            map_day_morning.put(reason, wDM);
+        }
+        wDM.increment();
 
-        /* Retrieve route frequency in the last 24 hours */
-        long delayPerBoro = w.computeTotal();
 
-        Values values = new Values();
-        values.add(msgId);
-        values.add(boro);
-        values.add(delayPerBoro);
-        values.add(timestamp);
+        /* Time has not moved forward. Update and emit count */  //WINDOW DAY
+/*        Window wDA = map_day_afternoon.get(reason);
+        if (wDA == null) {
+            wDA = new Window(1);
+            map_day_afternoon.put(reason, wDA);
+        }
+        wDA.increment();
 
-        collector.emit(values);
+
+        /* Time has not moved forward. Update and emit count */  //WINDOW WEEK
+/*        Window wWM = map_week_morning.get(reason);
+        if (wWM == null) {
+            wWM = new Window(7);
+            map_week_morning.put(reason, wWM);
+        }
+        wWM.increment();
+
+
+        /* Time has not moved forward. Update and emit count */  //WINDOW WEEK
+/*        Window wWA = map_week_afternoon.get(reason);
+        if (wWA == null) {
+            wWA = new Window(7);
+            map_week_morning.put(reason, wWA);
+        }
+        wWA.increment();
+
+
         collector.ack(tuple);
-
     }
-
 
 
     @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+    public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
 
+        outputFieldsDeclarer.declare(new Fields(F_MSGID, OCCURRED_ON, F_TIMESTAMP));
     }
+
 }
+
+ */

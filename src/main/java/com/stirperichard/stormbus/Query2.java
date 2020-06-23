@@ -1,12 +1,14 @@
 package com.stirperichard.stormbus;
 
-import com.stirperichard.stormbus.operator.*;
+import com.stirperichard.stormbus.operator.FilterByTime;
+import com.stirperichard.stormbus.operator.Metronome;
+import com.stirperichard.stormbus.operator.ParseCSV;
+import com.stirperichard.stormbus.operator.RedisSpout;
 import com.stirperichard.stormbus.utils.TConf;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.tuple.Fields;
 
 public class Query2 {
 
@@ -50,9 +52,9 @@ public class Query2 {
         builder.setBolt("metronome", new Metronome())
                 .setNumTasks(numTasksMetronome)
                 .allGrouping("filterbytime");
-
+/*
         //Count by window
-        builder.setBolt("countByWindow2", new CountByWindowQuery2())
+        builder.setBolt("countByWindow2", new CountByWindowQuery2.java())
                 .setNumTasks(numTasks)
                 .fieldsGrouping("filterbytime", new Fields(FilterByTime.REASON))
                 .allGrouping("metronome", Metronome.S_METRONOME);
