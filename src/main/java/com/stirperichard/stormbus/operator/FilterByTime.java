@@ -22,8 +22,9 @@ public class FilterByTime extends BaseRichBolt {
     public static final String F_TIMESTAMP 	        = "timestamp";
     public static final String OCCURRED_ON_MILLIS   = "occurred_on_millis";
     public static final String DAY_IN_MONTH         = "day_in_month";
-    public static final String MORNING             = "morning";
+    public static final String MORNING              = "morning";
     public static final String AFTERNOON            = "afternoon";
+    public static final String TYPE                 = "type";
 
 
     private static final long serialVersionUID = 1L;
@@ -41,17 +42,16 @@ public class FilterByTime extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
-        String msgId 			= tuple.getStringByField(ParseCSV.F_MSGID);
+        int msgId 			    = tuple.getIntegerByField(ParseCSV.F_MSGID);
         String occurredOn   	= tuple.getStringByField(ParseCSV.OCCURRED_ON);
         String reason           = tuple.getStringByField(ParseCSV.REASON);
         long occurredOnMillis	= tuple.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
-        long timestamp 		    = tuple.getLongByField(ParseCSV.F_TIMESTAMP);
-        int dayPerMonth         = tuple.getIntegerByField(ParseCSV.DAY_IN_MONTH);
 
-        int hour = 0;
+        int hour;
 
         try {
             hour = TimeUtils.getInfoDateHour(occurredOn);
+            System.out.println(hour);
         } catch (ParseException e) {
             e.printStackTrace();
             collector.ack(tuple);
@@ -62,16 +62,15 @@ public class FilterByTime extends BaseRichBolt {
             collector.ack(tuple);
             return;
 
-        } else if (hour >= 5 && hour < 12) {
+        } else if ((hour < 12) && (hour >= 5)) {
             Values values = new Values();
             values.add(msgId);
             values.add(occurredOn);
             values.add(reason);
             values.add(occurredOnMillis);
-            values.add(dayPerMonth);
-            values.add(timestamp);
+            values.add(MORNING);
 
-            collector.emit(MORNING, values);
+            collector.emit(values);
             collector.ack(tuple);
 
         } else {
@@ -80,17 +79,16 @@ public class FilterByTime extends BaseRichBolt {
             values.add(occurredOn);
             values.add(reason);
             values.add(occurredOnMillis);
-            values.add(dayPerMonth);
-            values.add(timestamp);
+            values.add(AFTERNOON);
 
-            collector.emit(AFTERNOON, values);
+            collector.emit(values);
             collector.ack(tuple);
         }
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields(F_MSGID, OCCURRED_ON, REASON, OCCURRED_ON_MILLIS, DAY_IN_MONTH, F_TIMESTAMP));
+        outputFieldsDeclarer.declare(new Fields(F_MSGID, OCCURRED_ON, REASON, OCCURRED_ON_MILLIS, TYPE));
 
     }
 }

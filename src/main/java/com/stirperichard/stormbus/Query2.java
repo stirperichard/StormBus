@@ -1,9 +1,6 @@
 package com.stirperichard.stormbus;
 
-import com.stirperichard.stormbus.operator.FilterByTime;
-import com.stirperichard.stormbus.operator.Metronome;
-import com.stirperichard.stormbus.operator.ParseCSV;
-import com.stirperichard.stormbus.operator.RedisSpout;
+import com.stirperichard.stormbus.operator.*;
 import com.stirperichard.stormbus.utils.TConf;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
@@ -11,6 +8,8 @@ import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
 
 public class Query2 {
+
+    public static String INPUT_FILE = "src/main/resources/dataset.csv";
 
     public static void main(String[] args) throws Exception {
 	// write your code here
@@ -32,12 +31,11 @@ public class Query2 {
         System.out.println("===================================================== ");
 
 
-
         /* Build topology */
         TopologyBuilder builder = new TopologyBuilder();
 
         //Redis
-        builder.setSpout("datasource", new RedisSpout(redisUrl, redisPort));
+        builder.setSpout("datasource", new DataGeneratorQ1(INPUT_FILE));
 
         //Parser
         builder.setBolt("parser", new ParseCSV())
@@ -51,10 +49,10 @@ public class Query2 {
         //Metronome
         builder.setBolt("metronome", new Metronome())
                 .setNumTasks(numTasksMetronome)
-                .allGrouping("filterbytime");
-/*
+                .allGrouping("parser");
+
         //Count by window
-        builder.setBolt("countByWindow2", new CountByWindowQuery2.java())
+        builder.setBolt("countByWindow2", new CountByWindowQuery2())
                 .setNumTasks(numTasks)
                 .allGrouping("filterbytime")
                 .allGrouping("metronome", Metronome.S_METRONOME);

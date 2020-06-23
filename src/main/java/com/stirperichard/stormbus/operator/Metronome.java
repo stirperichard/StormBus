@@ -54,10 +54,10 @@ public class Metronome extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
 
-        int ID = input.getIntegerByField(ParseCSV.F_MSGID);
-        String occurredOn = input.getStringByField(ParseCSV.OCCURRED_ON);
-        long occurredOnMillis = input.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
-        int dayMonth = input.getIntegerByField(ParseCSV.DAY_IN_MONTH);
+        int ID                  = input.getIntegerByField(ParseCSV.F_MSGID);
+        String occurredOn       = input.getStringByField(ParseCSV.OCCURRED_ON);
+        long occurredOnMillis   = input.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
+        int dayMonth            = input.getIntegerByField(ParseCSV.DAY_IN_MONTH);
 
 
         if(ID > prevIDMetronome){

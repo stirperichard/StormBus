@@ -1,18 +1,32 @@
 package com.stirperichard.stormbus.operator;
 
 
-/*
+import com.stirperichard.stormbus.utils.TimeUtils;
+import com.stirperichard.stormbus.utils.Window;
+import org.apache.storm.task.OutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichBolt;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.stirperichard.stormbus.utils.Constants.*;
+
 public class CountByWindowQuery2 extends BaseRichBolt {
 
 
     public static final String F_MSGID				= "msgId";
-    public static final String F_TIME				= "time";
     public static final String OCCURRED_ON       	= "occurredOn";
-    public static final String BORO 	            = "boro";
-    public static final String HOW_LONG_DELAYED 	= "howLongDelayed";
     public static final String F_TIMESTAMP      	= "timestamp";
     public static final String REASON           	= "reason";
-    public static final String OCCURRED_ON_MILLIS   = "occurred_on_millis";
+    public static final String TYPE                 = "type";
 
     public static final String DAY              = "day";
     public static final String WEEK             = "week";
@@ -20,25 +34,26 @@ public class CountByWindowQuery2 extends BaseRichBolt {
     private static final long serialVersionUID = 1L;
     private OutputCollector collector;
 
-    private int hour;
-
     private long latestCompletedTimeframeDay, latestCompletedTimeframeWeek;
 
     private SimpleDateFormat sdf;
 
     Map<String, Window> map_day_morning, map_day_afternoon, map_week_morning, map_week_afternoon;
 
+    public static int ID_from_metronomeQ2 = 0;
+    public static int ID_from_parseQ2 = 0;
+
 
     /*
      * QUERY 2 :
      *
-     *  Fornire la classifica delle tre cause di disservizio pi`u frequenti
+     *  Fornire la classifica delle tre cause di disservizio più frequenti
      * (ad esempio, Heavy Traffic, MechanicalProblem, Flat Tire)
      * nelle due fasce orarie di servizio 5:00-11:59 e 12:00-19:00.
-     * Le tre cause sonoordinate dalla pi`u frequente alla meno frequente.
+     * Le tre cause sonoordinate dalla più frequente alla meno frequente.
      *
      */
-/*
+
     public CountByWindowQuery2() {
     }
 
@@ -68,257 +83,353 @@ public class CountByWindowQuery2 extends BaseRichBolt {
     }
 
     private void handleMetronomeMessage(Tuple tuple){
-        String msgType          = tuple.getSourceStreamId();
-        String msgId 			= tuple.getStringByField(Metronome.F_MSGID);
-        Long time		 		= tuple.getLongByField(Metronome.OCCURREDON_MILLIS);
-        long timestamp 		    = tuple.getLongByField(Metronome.F_TIMESTAMP);
-        String occurredOn   	= tuple.getStringByField(Metronome.OCCURRED_ON);
 
-        if (msgType.equals(Metronome.METRONOME_D)) {
+        String msgType              = tuple.getSourceStreamId();
 
-            long latestTimeframe = TimeUtils.roundToCompletedDay(time);
+        if (msgType.equals(Metronome.S_METRONOME)) {
+            Long time		 		= tuple.getLongByField(Metronome.OCCURREDON_MILLIS);
+            String occurredOn   	= tuple.getStringByField(Metronome.OCCURRED_ON);
+            String typeMetronome    = tuple.getStringByField(Metronome.TYPE_OF_METRONOME);
+            int metronomeID         = tuple.getIntegerByField(Metronome.METRONOME_ID);
 
-            if (this.latestCompletedTimeframeDay < latestTimeframe) {
+            if (metronomeID > ID_from_metronomeQ2) {
+                ID_from_metronomeQ2 = metronomeID;
 
-                int elapsedDay = (int) Math.ceil((latestTimeframe - latestCompletedTimeframeDay) / (MILLIS_HOUR * 24));
-                List<String> expiredRoutes = new ArrayList<>();
+                if (typeMetronome.equals(Metronome.METRONOME_D)) {
+                    System.out.println("\u001B[33m" + "RICEVUTO METRONOMO DAY" + " WITH ID: " + metronomeID + "\u001B[0m");
+                    long latestTimeframe = TimeUtils.roundToCompletedDay(time);
 
-                for (String r : map_day.keySet()) {
+                    if (this.latestCompletedTimeframeDay < latestTimeframe) {
 
-                    Window w = map_day.get(r);
-                    if (w == null) {
-                        continue;
+                        int elapsedDay = (int) Math.ceil((latestTimeframe - this.latestCompletedTimeframeDay) / (MILLIS_HOUR * 24));
+                        List<String> expiredRoutes = new ArrayList<>();
+
+                        for (String r : map_day_morning.keySet()) {
+
+                            Window w = map_day_morning.get(r);
+                            if (w == null) {
+                                continue;
+                            }
+
+                            long numberOfDelays = w.getEstimatedTotal();
+
+                            w.moveForward(elapsedDay);
+
+                            /* Reduce memory by removing windows with no data */
+                            expiredRoutes.add(r);
+
+                            Values v = new Values();
+                            v.add(occurredOn);
+                            v.add(r);
+                            v.add(numberOfDelays);
+                            v.add(time);
+
+                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + r + "," + numberOfDelays + " TIME: " + time + "]" + "\u001B[0m");
+
+                            collector.emit(DAY, v);
+                        }
+
+                        /* Reduce memory by removing windows with no data */
+                        for (String r : expiredRoutes) {
+                            map_day_morning.remove(r);
+                        }
+
+                        this.latestCompletedTimeframeDay = latestTimeframe;
                     }
-
-                    w.moveForward(elapsedDay);
-                    int numberOfProblem = w.getCounter();
-
-                    // Reduce memory by removing windows with no data
-                    expiredRoutes.add(r);
-
-                    Values v = new Values();
-                    v.add(msgId);
-                    v.add(occurredOn);
-                    v.add(r);
-                    v.add(numberOfProblem);
-                    v.add(time);
-                    v.add(timestamp);
-                    collector.emit(DAY, v);
                 }
 
-                // Reduce memory by removing windows with no data
-                for (String r : expiredRoutes) {
-                    map_day.remove(r);
-                }
+                if (typeMetronome.equals(Metronome.METRONOME_W)) {
 
-                this.latestCompletedTimeframeDay = latestTimeframe;
-            }
-        }
+                    System.out.println("\u001B[33m" + "RICEVUTO METRONOMO WEEK" + " WITH ID: " + metronomeID + "\u001B[0m");
+                    long latestTimeframe = TimeUtils.lastWeek(time);
 
-        if (msgType.equals(Metronome.METRONOME_W)) {
+                    if (this.latestCompletedTimeframeWeek < latestTimeframe) {
 
-            long latestTimeframe = TimeUtils.lastWeek(time);
+                        int elapsedWeek = (int) Math.ceil((latestTimeframe - this.latestCompletedTimeframeWeek) / (MILLIS_HOUR * 24 * 7));
+                        List<String> expiredRoutes = new ArrayList<>();
 
-            if (this.latestCompletedTimeframeWeek < latestTimeframe) {
+                        for (String r : map_week_morning.keySet()) {
 
-                int elapsedWeek = (int) Math.ceil((latestTimeframe - latestCompletedTimeframeWeek) / (MILLIS_HOUR * 24 * 7));
-                List<String> expiredRoutes = new ArrayList<>();
+                            Window w = map_week_morning.get(r);
+                            if (w == null) {
+                                continue;
+                            }
 
-                for (String r : map_week.keySet()) {
+                            long numberOfDelays = w.getEstimatedTotal();
 
-                    Window w = map_week.get(r);
-                    if (w == null) {
-                        continue;
+                            w.moveForward(elapsedWeek);
+
+                            /* Reduce memory by removing windows with no data */
+                            expiredRoutes.add(r);
+
+                            Values v = new Values();
+                            v.add(occurredOn);
+                            v.add(r);
+                            v.add(numberOfDelays);
+                            v.add(time);
+
+                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + r + "," + numberOfDelays + " TIME: " + time + "]" + "\u001B[0m");
+
+                            collector.emit(WEEK, v);
+                        }
+
+                        /* Reduce memory by removing windows with no data */
+                        for (String r : expiredRoutes) {
+                            map_week_morning.remove(r);
+                        }
+
+                        this.latestCompletedTimeframeWeek = latestTimeframe;
                     }
-
-                    w.moveForward(elapsedWeek);
-                    int numberOfProblem = w.getCounter();
-
-                    // Reduce memory by removing windows with no data
-                    expiredRoutes.add(r);
-
-                    Values v = new Values();
-                    v.add(msgId);
-                    v.add(occurredOn);
-                    v.add(r);
-                    v.add(numberOfProblem);
-                    v.add(time);
-                    v.add(timestamp);
-                    collector.emit(WEEK, v);
                 }
-
-                // Reduce memory by removing windows with no data
-                for (String r : expiredRoutes) {
-                    map_week.remove(r);
-                }
-
-                this.latestCompletedTimeframeWeek = latestTimeframe;
             }
         }
 
         collector.ack(tuple);
-
     }
 
     private void handleBusData(Tuple tuple){
 
-        String source           = tuple.getSourceStreamId();
-        String reason 			= tuple.getStringByField(ParseCSV.REASON);
-        String occurredOn   	= tuple.getStringByField(ParseCSV.OCCURRED_ON);
-        int howLongDelayed	    = tuple.getIntegerByField(ParseCSV.HOW_LONG_DELAYED);
-        long occurredOnMillis   = tuple.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
+        String occurredOn   	= tuple.getStringByField(FilterByTime.OCCURRED_ON);
+        long time               = tuple.getLongByField(FilterByTime.OCCURRED_ON_MILLIS);
+        int msgID               = tuple.getIntegerByField(FilterByTime.F_MSGID);
+        String reason           = tuple.getStringByField(FilterByTime.REASON);
+        String type             = tuple.getStringByField(FilterByTime.TYPE);
 
-        long latestTimeframeDay     = TimeUtils.roundToCompletedDay(occurredOnMillis);
-        long latestTimeframeWeek    = TimeUtils.lastWeek(occurredOnMillis);
 
-        if(this.latestCompletedTimeframeDay == 0){
-            this.latestCompletedTimeframeDay = TimeUtils.roundToCompletedHour(occurredOnMillis);
-        }
+        if (msgID > ID_from_parseQ2){
 
-        if(this.latestCompletedTimeframeWeek == 0){
-            this.latestCompletedTimeframeWeek = TimeUtils.lastWeek(occurredOnMillis);
-        }
+            ID_from_parseQ2 = msgID;
 
-        if (latestTimeframeDay > this.latestCompletedTimeframeDay) {
-            int elapsedDay = (int) Math.ceil((latestTimeframeDay - this.latestCompletedTimeframeDay) / (MILLIS_HOUR * 24));
-            List<String> expiredRoutes = new ArrayList<>();
+            long latestTimeframeDay = TimeUtils.roundToCompletedDay(time);
+            long latestTimeframeWeek = TimeUtils.lastWeek(time);
 
-            for (String r : map_day_morning.keySet()) {
+            if (this.latestCompletedTimeframeDay < latestTimeframeDay){
+                System.out.println("\u001B[36m" + "[" + "DATA DAY" + "]" + "\u001B[0m");
+                System.out.println("\u001B[36m" + "[" + map_day_morning + "]" + "\u001B[0m");
+                System.out.println("\u001B[36m" + "[" + map_week_afternoon + "]" + "\u001B[0m");
 
-                Window w = map_day_morning.get(r);
-                if (w == null) {
-                    continue;
+                int elapsedDay = (int) Math.ceil((latestTimeframeDay - this.latestCompletedTimeframeDay) / (MILLIS_DAY));
+                List<String> expiredRoutes = new ArrayList<>();
+
+                if(type.equals(FilterByTime.MORNING)){
+                    for (String r : map_day_morning.keySet()){
+
+                        Window w = map_day_morning.get(r);
+                        if (w == null){
+                            continue;
+                        }
+
+                        long numberOfDelays = w.getEstimatedTotal();
+
+                        w.moveForward(elapsedDay);
+
+                        // Reduce memory by removing windows with no data
+                        expiredRoutes.add(r);
+
+                        Values v = new Values();
+                        v.add(DAY);
+                        v.add(occurredOn);
+                        v.add(r);
+                        v.add(numberOfDelays);
+                        v.add(time);
+
+                        System.out.println("EVENT OCCURRED AT:" + occurredOn + " REASON: " + r + " NUMBER OF DELAYS PER REASON MORNING DAY: " + numberOfDelays);
+
+                        collector.emit(v);
+                    }
+                } else if (type.equals(FilterByTime.AFTERNOON)){
+                    for (String r : map_week_afternoon.keySet()){
+
+                        Window w = map_week_afternoon.get(r);
+                        if (w == null){
+                            continue;
+                        }
+
+                        long numberOfDelays = w.getEstimatedTotal();
+
+                        w.moveForward(elapsedDay);
+
+                        // Reduce memory by removing windows with no data
+                        expiredRoutes.add(r);
+
+                        Values v = new Values();
+                        v.add(DAY);
+                        v.add(occurredOn);
+                        v.add(r);
+                        v.add(numberOfDelays);
+                        v.add(time);
+
+                        System.out.println("EVENT OCCURRED AT:" + occurredOn + " REASON: " + r + " NUMBER OF DELAYS PER REASON AFTERNOON DAY: " + numberOfDelays);
+
+                        collector.emit(v);
+                    }
                 }
 
-                w.moveForward(elapsedDay);
-                long delayPerBoroPerDay = w.getEstimatedTotal();
-                long avgPerBoroPerDay = delayPerBoroPerDay/24;  //Sommatoria giornaliera diviso il numero di ore
 
                 // Reduce memory by removing windows with no data
-                expiredRoutes.add(r);
-
-                Values v = new Values();
-                v.add(occurredOn);
-                v.add(r);
-                v.add(avgPerBoroPerDay);
-                v.add(occurredOnMillis);
-                collector.emit(DAY, v);
-            }
-
-
-            for (String r : map_day_afternoon.keySet()) {
-
-                Window w = map_day_afternoon.get(r);
-                if (w == null) {
-                    continue;
+                for (String r : expiredRoutes){
+                    map_week_morning.remove(r);
+                    map_week_afternoon.remove(r);
                 }
 
-                w.moveForward(elapsedDay);
-                long delayPerBoroPerDay = w.getEstimatedTotal();
-                long avgPerBoroPerDay = delayPerBoroPerDay/24;  //Sommatoria giornaliera diviso il numero di ore
+                if (type.equals(FilterByTime.MORNING)){
+                    Window wD = map_day_morning.get(reason);
+                    if (wD == null) {
+                        wD = new Window(1);
+                        map_day_morning.put(reason, wD);
+                    }
+                    wD.increment(1);
 
-                // Reduce memory by removing windows with no data
-                expiredRoutes.add(r);
-
-                Values v = new Values();
-                v.add(occurredOn);
-                v.add(r);
-                v.add(avgPerBoroPerDay);
-                v.add(occurredOnMillis);
-                collector.emit(DAY, v);
-            }
-
-            // Reduce memory by removing windows with no data
-            for (String r : expiredRoutes) {
-                map_day_afternoon.remove(r);
-                map_day_morning.remove(r);
-            }
-
-
-
-            this.latestCompletedTimeframeDay = latestTimeframeDay;
-        }
-
-        if (latestTimeframeWeek > this.latestCompletedTimeframeWeek) {
-            int elapsedWeek = (int) Math.ceil((latestTimeframeWeek - this.latestCompletedTimeframeWeek) / (MILLIS_HOUR * 24 * 7));
-            List<String> expiredRoutes = new ArrayList<>();
-
-            for (String r : map_week.keySet()) {
-
-                Window w = map_week.get(r);
-                if (w == null) {
-                    continue;
+                } else if (type.equals(FilterByTime.AFTERNOON)){
+                    Window wD = map_day_afternoon.get(reason);
+                    if (wD == null) {
+                        wD = new Window(1);
+                        map_day_afternoon.put(reason, wD);
+                    }
+                    wD.increment(1);
                 }
 
-                w.moveForward(elapsedWeek);
-                long delayPerBoroPerWeek = w.getEstimatedTotal();
-                long avgDelayPerBoroPerWeek = delayPerBoroPerWeek / 7;    //Media settimanale in base giornaliera
+                this.latestCompletedTimeframeDay = latestTimeframeDay;
+
+            } else {
+
+                if (type.equals(FilterByTime.MORNING)){
+                    Window wD = map_day_morning.get(reason);
+                    if (wD == null) {
+                        wD = new Window(1);
+                        map_day_morning.put(reason, wD);
+                    }
+                    wD.increment(1);
+
+                } else if (type.equals(FilterByTime.AFTERNOON)){
+                    Window wD = map_day_afternoon.get(reason);
+                    if (wD == null) {
+                        wD = new Window(1);
+                        map_day_afternoon.put(reason, wD);
+                    }
+                    wD.increment(1);
+
+                }
+            }
+
+
+
+
+            if (this.latestCompletedTimeframeWeek < latestTimeframeWeek) {
+                System.out.println("\u001B[36m" + "[" + "DATA WEEK" + "]" + "\u001B[0m");
+                System.out.println("\u001B[36m" + "[" + map_week_morning + "]" + "\u001B[0m");
+                System.out.println("\u001B[36m" + "[" + map_week_afternoon + "]" + "\u001B[0m");
+
+                int elapsedWeek = (int) Math.ceil((latestTimeframeWeek - this.latestCompletedTimeframeWeek) / (MILLIS_WEEK));
+                List<String> expiredRoutes = new ArrayList<>();
+
+                if(type.equals(FilterByTime.MORNING)) {
+
+                    for (String r : map_week_morning.keySet()) {
+
+                        Window w = map_week_morning.get(r);
+                        if (w == null) {
+                            continue;
+                        }
+
+                        long numberOfDelays = w.getEstimatedTotal();
+                        w.moveForward(elapsedWeek);
+
+                        //Reduce memory by removing windows with no data
+                        expiredRoutes.add(r);
+
+                        Values v = new Values();
+                        v.add(WEEK);
+                        v.add(occurredOn);
+                        v.add(r);
+                        v.add(numberOfDelays);
+                        v.add(time);
+
+                        System.out.println("EVENT OCCURRED AT:" + occurredOn + " REASON: " + r + " NUMBER OF DELAYS PER REASON MORNING WEEK: " + numberOfDelays);
+
+                        collector.emit(v);
+                    }
+
+                } else if(type.equals(FilterByTime.AFTERNOON)){
+                    for (String r : map_week_afternoon.keySet()) {
+
+                        Window w = map_week_afternoon.get(r);
+                        if (w == null) {
+                            continue;
+                        }
+
+                        long numberOfDelays = w.getEstimatedTotal();
+
+                        w.moveForward(elapsedWeek);
+
+                        //Reduce memory by removing windows with no data
+                        expiredRoutes.add(r);
+
+                        Values v = new Values();
+                        v.add(WEEK);
+                        v.add(occurredOn);
+                        v.add(r);
+                        v.add(numberOfDelays);
+                        v.add(time);
+
+                        System.out.println("EVENT OCCURRED AT:" + occurredOn + " REASON: " + r + " NUMBER OF DELAYS PER REASON AFTERNOON WEEK: " + numberOfDelays);
+
+                        collector.emit(v);
+                    }
+                }
 
                 // Reduce memory by removing windows with no data
-                expiredRoutes.add(r);
+                for (String r : expiredRoutes) {
+                    map_week_morning.remove(r);
+                    map_week_afternoon.remove(r);
+                }
 
-                Values v = new Values();
-                v.add(occurredOn);
-                v.add(r);
-                v.add(avgDelayPerBoroPerWeek);
-                v.add(occurredOnMillis);
-                collector.emit(WEEK, v);
+                if (type.equals(FilterByTime.MORNING)){
+                    Window wD = map_week_morning.get(reason);
+                    if (wD == null) {
+                        wD = new Window(1);
+                        map_week_morning.put(reason, wD);
+                    }
+                    wD.increment(1);
+
+                } else if (type.equals(FilterByTime.AFTERNOON)){
+                    Window wD = map_week_afternoon.get(reason);
+                    if (wD == null) {
+                        wD = new Window(1);
+                        map_week_afternoon.put(reason, wD);
+                    }
+                    wD.increment(1);
+                }
+
+                this.latestCompletedTimeframeWeek = latestTimeframeWeek;
+
+            } else {
+                if (type.equals(FilterByTime.MORNING)){
+                    Window wD = map_week_morning.get(reason);
+                    if (wD == null) {
+                        wD = new Window(1);
+                        map_week_morning.put(reason, wD);
+                    }
+                    wD.increment(1);
+                } else if (type.equals(FilterByTime.AFTERNOON)){
+                    Window wD = map_week_afternoon.get(reason);
+                    if (wD == null) {
+                        wD = new Window(1);
+                        map_week_afternoon.put(reason, wD);
+                    }
+                    wD.increment(1);
+                }
             }
-
-            // Reduce memory by removing windows with no data
-            for (String r : expiredRoutes) {
-                map_week.remove(r);
-            }
-
-            this.latestCompletedTimeframeWeek = latestTimeframeWeek;
         }
 
-        // Time has not moved forward. Update and emit count  //WINDOW DAY
-        Window wDM = map_day_morning.get(reason);
-        if (wDM == null) {
-            wDM = new Window(1);
-            map_day_morning.put(reason, wDM);
-        }
-        wDM.increment();
-
-
-        // Time has not moved forward. Update and emit count   //WINDOW DAY
-        Window wDA = map_day_afternoon.get(reason);
-        if (wDA == null) {
-            wDA = new Window(1);
-            map_day_afternoon.put(reason, wDA);
-        }
-        wDA.increment();
-
-
-        // Time has not moved forward. Update and emit count   //WINDOW WEEK
-        Window wWM = map_week_morning.get(reason);
-        if (wWM == null) {
-            wWM = new Window(7);
-            map_week_morning.put(reason, wWM);
-        }
-        wWM.increment();
-
-
-        // Time has not moved forward. Update and emit count   //WINDOW WEEK
-        Window wWA = map_week_afternoon.get(reason);
-        if (wWA == null) {
-            wWA = new Window(7);
-            map_week_morning.put(reason, wWA);
-        }
-        wWA.increment();
-
-
+        //ACK
         collector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields(F_MSGID, OCCURRED_ON, F_TIMESTAMP));
+        outputFieldsDeclarer.declare(new Fields(TYPE, F_MSGID, OCCURRED_ON, F_TIMESTAMP));
     }
 
-
 }
-
- */
 

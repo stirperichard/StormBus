@@ -73,7 +73,8 @@ public class ParseCSV extends BaseRichBolt {
 
             if (!data[5].isEmpty()) {
                 //Aggiungo la Reason
-                values.add(mappingReason(data[5]));
+                //values.add(mappingReason(data[5]));
+                values.add(data[5]);
             } else {
                 collector.ack(input);
                 return;
@@ -129,6 +130,7 @@ public class ParseCSV extends BaseRichBolt {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(dDate.getTime());
             int dayMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+
             values.add(dayMonth);
 
             collector.ack(input);

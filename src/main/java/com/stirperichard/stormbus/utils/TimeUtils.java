@@ -131,7 +131,7 @@ public class TimeUtils {
         Date dDate = sdf.parse(occurredOn);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dDate);
-        return calendar.get(Calendar.HOUR);
+        return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
     public static int getInfoDateMinute(String occurredOn) throws ParseException {

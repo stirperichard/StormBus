@@ -19,10 +19,10 @@ public class ParseTime {
 
         //Ci sono dei valori che al posto di "1" contengono "I"
         if(String.valueOf(delay.charAt(0)).equals("I")){
-            String subs = delay.substring(1).replaceAll("[^-ImMhH0123456789/]", "");
+            String subs = delay.substring(1).replaceAll("[^-ImMHH0123456789/]", "");
             delay = "1" + subs;
         } else {
-            delay = delay.replaceAll("[^-mMhH0123456789/]", "");
+            delay = delay.replaceAll("[^-mMHH0123456789/]", "");
         } //Ritorna una stringa di solo numeri, m, h e nel caso trova un I al primo posto lo converte in 1
 
 
