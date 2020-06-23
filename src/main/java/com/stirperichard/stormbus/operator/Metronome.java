@@ -87,7 +87,7 @@ public class Metronome extends BaseRichBolt {
                 values.add(occurredOn);
                 values.add(metronomeID);
                 collector.emit(S_METRONOME, values);
-                System.out.println("\u001B[33m" + "METRONOME HOUR" + "ID METRONOME: " + metronomeID + "\u001B[0m");
+                System.out.println("\u001B[33m" + "SEND METRONOME HOUR -" + " ID METRONOME: " + metronomeID + "\u001B[0m");
             }
 
             // Metronome sends tick every day
@@ -101,7 +101,7 @@ public class Metronome extends BaseRichBolt {
                 values.add(occurredOn);
                 values.add(metronomeID);
                 collector.emit(S_METRONOME, values);
-                System.out.println("\u001B[33m" + "METRONOME DAY" + "\u001B[0m");
+                System.out.println("\u001B[33m" + "SEND METRONOME DAY -" + " ID METRONOME: " + metronomeID + "\u001B[0m");
             }
 
             // Metronome sends tick every week
@@ -115,7 +115,7 @@ public class Metronome extends BaseRichBolt {
                 values.add(occurredOn);
                 values.add(metronomeID);
                 collector.emit(S_METRONOME, values);
-                System.out.println("\u001B[33m" + "METRONOME WEEK" + "\u001B[0m");
+                System.out.println("\u001B[33m" + "SEND METRONOME WEEK -" + " ID METRONOME: " + metronomeID + "\u001B[0m");
             }
 
             // Metronome sends tick every month
@@ -129,7 +129,7 @@ public class Metronome extends BaseRichBolt {
                 values.add(occurredOn);
                 values.add(metronomeID);
                 collector.emit(S_METRONOME, values);
-                System.out.println("\u001B[33m" + "METRONOME MONTH" + "\u001B[0m");
+                System.out.println("\u001B[33m" + "SEND METRONOME MONTH -" + " ID METRONOME: " + metronomeID + "\u001B[0m");
             }
 
             collector.ack(input);

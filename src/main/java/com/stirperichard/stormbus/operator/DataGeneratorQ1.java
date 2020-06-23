@@ -116,7 +116,7 @@ public class DataGeneratorQ1 extends BaseRichSpout {
                     // to this one
                     long fromTupleToSystemTime = Constants.TIME_UNIT_IN_SECONDS * Constants.SECONDS_PER_TIME_UNIT;
                     long sleepTime = (occurredOnMillis - lastTs) /  fromTupleToSystemTime;
-                    System.out.println("Sleep for: \u001B[31m" + sleepTime + "\u001B[0m");
+                    //System.out.println("Sleep for: \u001B[31m" + sleepTime + "\u001B[0m");
                     Utils.sleep(sleepTime/10);
                 }
                 lastTs = occurredOnMillis;
