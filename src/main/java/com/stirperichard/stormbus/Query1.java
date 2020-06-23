@@ -1,9 +1,6 @@
 package com.stirperichard.stormbus;
 
-import com.stirperichard.stormbus.operator.CountByWindowQuery1;
-import com.stirperichard.stormbus.operator.DataGeneratorQ1;
-import com.stirperichard.stormbus.operator.Metronome;
-import com.stirperichard.stormbus.operator.ParseCSV;
+import com.stirperichard.stormbus.operator.*;
 import com.stirperichard.stormbus.utils.TConf;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
@@ -14,6 +11,7 @@ import org.apache.storm.topology.TopologyBuilder;
 public class Query1 {
 
     public static String INPUT_FILE = "src/main/resources/dataset.csv";
+    public static String OUTPUT_PATH = "src/main/results";
 
     public static void main(String[] args) throws Exception {
 	// write your code here
@@ -60,24 +58,9 @@ public class Query1 {
                 .allGrouping("metronome", Metronome.S_METRONOME);
 
 
-		/* Two operators that realize the top-10 ranking in two steps (typical design pattern):
-        PartialRank can be distributed and parallelized,
-        whereas TotalRank is centralized and computes the global ranking */
-/*
-        builder.setBolt("partialRank", new PartialRank(10))
-                .setNumTasks(numTasks)
-                .fieldsGrouping("countByWindow", new Fields(ComputeCellID.F_ROUTE));
+        builder.setBolt("to_file", new DataWriter(OUTPUT_PATH))
+                .globalGrouping("countByWindow");
 
-        builder.setBolt("globalRank", new GlobalRank(10, rabbitMqHost, rabbitMqUsername, rabbitMqPassword), 1)
-                .setNumTasks(numTasksGlobalRank)
-                .shuffleGrouping("partialRank");
-
-        builder.setBolt("rankings", new RankingBolt(TOP_N))
-                .globalGrouping("profitability");
-
-        builder.setBolt("to_file", new DataWriter(OUTPUT_FILE))
-                .globalGrouping("rankings");
-*/
         StormTopology stormTopology = builder.createTopology();
 
         /* Create configurations */

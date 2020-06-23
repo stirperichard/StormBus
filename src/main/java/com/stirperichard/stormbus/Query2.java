@@ -56,7 +56,7 @@ public class Query2 {
         //Count by window
         builder.setBolt("countByWindow2", new CountByWindowQuery2.java())
                 .setNumTasks(numTasks)
-                .fieldsGrouping("filterbytime", new Fields(FilterByTime.REASON))
+                .allGrouping("filterbytime")
                 .allGrouping("metronome", Metronome.S_METRONOME);
 
 		/* Two operators that realize the top-10 ranking in two steps (typical design pattern):

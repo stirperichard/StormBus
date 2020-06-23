@@ -36,8 +36,6 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
     private static final long serialVersionUID  = 1L;
     private OutputCollector collector;
-    private static final int WINDOW_SIZE 		= 24;  //hour
-    private static final int WINDOWS_SIZE_WEEK  = 7;
 
     private long latestCompletedTimeframeHour, latestCompletedTimeframeDay,
             latestCompletedTimeframeWeek, latestCompletedTimeframeMonth;
@@ -166,7 +164,8 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                             }
 
                             long delayPerBoroPerDay = w.getEstimatedTotal();
-                            float avgPerBoroPerDay = delayPerBoroPerDay / 24;  //Sommatoria giornaliera diviso il numero di ore
+                            int numberOfDelays = w.getCounter();
+                            float avgPerBoroPerDay = delayPerBoroPerDay / numberOfDelays;  //Sommatoria giornaliera diviso il numero di eventi nelle 24 ore
                             w.moveForward(elapsedDay);
 
                             /* Reduce memory by removing windows with no data */
@@ -212,7 +211,8 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                             }
 
                             long delayPerBoroPerWeek = w.getEstimatedTotal();
-                            float avgDelayPerBoroPerWeek = delayPerBoroPerWeek / 7;    //Media settimanale in base giornaliera
+                            int numberOfDelays = w.getCounter();
+                            float avgDelayPerBoroPerWeek = delayPerBoroPerWeek / numberOfDelays;    //Media settimanale in base eventi
                             w.moveForward(elapsedWeek);
 
                             /* Reduce memory by removing windows with no data */
@@ -258,8 +258,10 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                                 continue;
                             }
 
+                            int numberOfDelays = w.getCounter();
+
                             long delayPerBoroPerMonth = w.getEstimatedTotal();
-                            float avgDelayPerBoroPerMonth = delayPerBoroPerMonth / dayPerMonth;   //Media mensile su base giornaliera
+                            float avgDelayPerBoroPerMonth = delayPerBoroPerMonth / numberOfDelays;   //Media mensile su base giornaliera
                             w.moveForward(elapsedMonth);
 
                             /* Reduce memory by removing windows with no data */
@@ -351,7 +353,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
                 Window wH = map_hour.get(boro);
                 if (wH == null) {
-                    wH = new Window(WINDOW_SIZE);
+                    wH = new Window(1);
                     map_hour.put(boro, wH);
                 }
                 wH.increment(howLongDelayed);
@@ -363,7 +365,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                 /* Time has not moved forward. Update and emit count */
                 Window wH = map_hour.get(boro);
                 if (wH == null) {
-                    wH = new Window(WINDOW_SIZE);
+                    wH = new Window(1);
                     map_hour.put(boro, wH);
                 }
                 wH.increment(howLongDelayed);
@@ -384,7 +386,8 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     }
 
                     long delayPerBoroPerDay = w.getEstimatedTotal();
-                    long avgPerBoroPerDay = delayPerBoroPerDay / 24;  //Sommatoria giornaliera diviso il numero di ore
+                    int numberOfDelays = w.getCounter();
+                    long avgPerBoroPerDay = delayPerBoroPerDay / numberOfDelays;  //Sommatoria giornaliera diviso il numero di eventi nelle 24 ore
 
                     w.moveForward(elapsedDay);
 
@@ -407,7 +410,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
                 Window wD = map_day.get(boro);
                 if (wD == null) {
-                    wD = new Window(WINDOW_SIZE);
+                    wD = new Window(1);
                     map_day.put(boro, wD);
                 }
                 wD.increment(howLongDelayed);
@@ -419,7 +422,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                 /* Time has not moved forward. Update and emit count */
                 Window wD = map_day.get(boro);
                 if (wD == null) {
-                    wD = new Window(WINDOW_SIZE);
+                    wD = new Window(1);
                     map_day.put(boro, wD);
                 }
                 wD.increment(howLongDelayed);
@@ -440,7 +443,8 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     }
 
                     long delayPerBoroPerWeek = w.getEstimatedTotal();
-                    long avgDelayPerBoroPerWeek = delayPerBoroPerWeek / 7;    //Media settimanale in base giornaliera
+                    int numberOfDelays = w.getCounter();
+                    long avgDelayPerBoroPerWeek = delayPerBoroPerWeek / numberOfDelays;    //Media settimanale in base eventi
                     w.moveForward(elapsedWeek);
 
                     //Reduce memory by removing windows with no data
@@ -462,7 +466,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
                 Window wW = map_week.get(boro);
                 if (wW == null) {
-                    wW = new Window(WINDOWS_SIZE_WEEK);
+                    wW = new Window(1);
                     map_week.put(boro, wW);
                 }
                 wW.increment(howLongDelayed);
@@ -473,7 +477,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                 /* Time has not moved forward. Update and emit count */
                 Window wW = map_week.get(boro);
                 if (wW == null) {
-                    wW = new Window(WINDOWS_SIZE_WEEK);
+                    wW = new Window(1);
                     map_week.put(boro, wW);
                 }
                 wW.increment(howLongDelayed);
@@ -494,7 +498,8 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     }
 
                     long delayPerBoroPerMonth = w.getEstimatedTotal();
-                    long avgDelayPerBoroPerMonth = delayPerBoroPerMonth / dayPerMonth;   //Media mensile su base giornaliera
+                    int numberOfDelays = w.getCounter();
+                    long avgDelayPerBoroPerMonth = delayPerBoroPerMonth / numberOfDelays;   //Media mensile su base eventi
                     w.moveForward(elapsedMonth);
 
                     // Reduce memory by removing windows with no data
@@ -516,7 +521,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
                 Window wM = map_month.get(boro);
                 if (wM == null) {
-                    wM = new Window(dayPerMonth);
+                    wM = new Window(1);
                     map_month.put(boro, wM);
                 }
                 wM.increment(howLongDelayed);
@@ -528,7 +533,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                 /* Time has not moved forward. Update and emit count */
                 Window wM = map_month.get(boro);
                 if (wM == null) {
-                    wM = new Window(dayPerMonth);
+                    wM = new Window(1);
                     map_month.put(boro, wM);
                 }
                 wM.increment(howLongDelayed);

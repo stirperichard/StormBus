@@ -33,7 +33,9 @@ public class Window {
 		
 		/* Move forward the current index */
 		currentIndex = (currentIndex + 1) % size;
-		
+
+		this.counter = 0;
+
 		return value;
 		
 	}	

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by affo on 05/11/15.
+ *  DATA WRITER TO CSV
  */
 public class DataWriter extends BaseRichBolt {
 

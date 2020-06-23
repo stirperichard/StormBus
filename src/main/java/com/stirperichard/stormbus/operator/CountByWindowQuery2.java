@@ -1,7 +1,9 @@
 package com.stirperichard.stormbus.operator;
 
+
 /*
 public class CountByWindowQuery2 extends BaseRichBolt {
+
 
     public static final String F_MSGID				= "msgId";
     public static final String F_TIME				= "time";
@@ -41,8 +43,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
     }
 
     @Override
-    public void prepare(@SuppressWarnings("rawtypes") Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-
+    public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.collector=outputCollector;
         this.latestCompletedTimeframeDay = 0;
         this.latestCompletedTimeframeWeek = 0;
@@ -51,7 +52,6 @@ public class CountByWindowQuery2 extends BaseRichBolt {
         this.map_week_morning = new HashMap<String, Window>();
         this.map_week_afternoon = new HashMap<String, Window>();
         this.sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-
     }
 
     @Override
@@ -93,8 +93,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                     w.moveForward(elapsedDay);
                     int numberOfProblem = w.getCounter();
 
-                    /* Reduce memory by removing windows with no data */
-/*                    expiredRoutes.add(r);
+                    // Reduce memory by removing windows with no data
+                    expiredRoutes.add(r);
 
                     Values v = new Values();
                     v.add(msgId);
@@ -106,8 +106,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                     collector.emit(DAY, v);
                 }
 
-                /* Reduce memory by removing windows with no data */
-/*                for (String r : expiredRoutes) {
+                // Reduce memory by removing windows with no data
+                for (String r : expiredRoutes) {
                     map_day.remove(r);
                 }
 
@@ -134,8 +134,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                     w.moveForward(elapsedWeek);
                     int numberOfProblem = w.getCounter();
 
-                    /* Reduce memory by removing windows with no data */
- /*                   expiredRoutes.add(r);
+                    // Reduce memory by removing windows with no data
+                    expiredRoutes.add(r);
 
                     Values v = new Values();
                     v.add(msgId);
@@ -147,8 +147,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                     collector.emit(WEEK, v);
                 }
 
-                /* Reduce memory by removing windows with no data */
- /*               for (String r : expiredRoutes) {
+                // Reduce memory by removing windows with no data
+                for (String r : expiredRoutes) {
                     map_week.remove(r);
                 }
 
@@ -194,8 +194,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                 long delayPerBoroPerDay = w.getEstimatedTotal();
                 long avgPerBoroPerDay = delayPerBoroPerDay/24;  //Sommatoria giornaliera diviso il numero di ore
 
-                /* Reduce memory by removing windows with no data */
-/*                expiredRoutes.add(r);
+                // Reduce memory by removing windows with no data
+                expiredRoutes.add(r);
 
                 Values v = new Values();
                 v.add(occurredOn);
@@ -217,8 +217,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                 long delayPerBoroPerDay = w.getEstimatedTotal();
                 long avgPerBoroPerDay = delayPerBoroPerDay/24;  //Sommatoria giornaliera diviso il numero di ore
 
-                /* Reduce memory by removing windows with no data */
-/*                expiredRoutes.add(r);
+                // Reduce memory by removing windows with no data
+                expiredRoutes.add(r);
 
                 Values v = new Values();
                 v.add(occurredOn);
@@ -228,8 +228,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                 collector.emit(DAY, v);
             }
 
-            /* Reduce memory by removing windows with no data */
-/*            for (String r : expiredRoutes) {
+            // Reduce memory by removing windows with no data
+            for (String r : expiredRoutes) {
                 map_day_afternoon.remove(r);
                 map_day_morning.remove(r);
             }
@@ -254,8 +254,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                 long delayPerBoroPerWeek = w.getEstimatedTotal();
                 long avgDelayPerBoroPerWeek = delayPerBoroPerWeek / 7;    //Media settimanale in base giornaliera
 
-                /* Reduce memory by removing windows with no data */
-/*                expiredRoutes.add(r);
+                // Reduce memory by removing windows with no data
+                expiredRoutes.add(r);
 
                 Values v = new Values();
                 v.add(occurredOn);
@@ -265,16 +265,16 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                 collector.emit(WEEK, v);
             }
 
-            /* Reduce memory by removing windows with no data */
-/*            for (String r : expiredRoutes) {
+            // Reduce memory by removing windows with no data
+            for (String r : expiredRoutes) {
                 map_week.remove(r);
             }
 
             this.latestCompletedTimeframeWeek = latestTimeframeWeek;
         }
 
-        /* Time has not moved forward. Update and emit count */  //WINDOW DAY
-/*        Window wDM = map_day_morning.get(reason);
+        // Time has not moved forward. Update and emit count  //WINDOW DAY
+        Window wDM = map_day_morning.get(reason);
         if (wDM == null) {
             wDM = new Window(1);
             map_day_morning.put(reason, wDM);
@@ -282,8 +282,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
         wDM.increment();
 
 
-        /* Time has not moved forward. Update and emit count */  //WINDOW DAY
-/*        Window wDA = map_day_afternoon.get(reason);
+        // Time has not moved forward. Update and emit count   //WINDOW DAY
+        Window wDA = map_day_afternoon.get(reason);
         if (wDA == null) {
             wDA = new Window(1);
             map_day_afternoon.put(reason, wDA);
@@ -291,8 +291,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
         wDA.increment();
 
 
-        /* Time has not moved forward. Update and emit count */  //WINDOW WEEK
-/*        Window wWM = map_week_morning.get(reason);
+        // Time has not moved forward. Update and emit count   //WINDOW WEEK
+        Window wWM = map_week_morning.get(reason);
         if (wWM == null) {
             wWM = new Window(7);
             map_week_morning.put(reason, wWM);
@@ -300,8 +300,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
         wWM.increment();
 
 
-        /* Time has not moved forward. Update and emit count */  //WINDOW WEEK
-/*        Window wWA = map_week_afternoon.get(reason);
+        // Time has not moved forward. Update and emit count   //WINDOW WEEK
+        Window wWA = map_week_afternoon.get(reason);
         if (wWA == null) {
             wWA = new Window(7);
             map_week_morning.put(reason, wWA);
@@ -312,13 +312,13 @@ public class CountByWindowQuery2 extends BaseRichBolt {
         collector.ack(tuple);
     }
 
-
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-
         outputFieldsDeclarer.declare(new Fields(F_MSGID, OCCURRED_ON, F_TIMESTAMP));
     }
+
 
 }
 
  */
+
