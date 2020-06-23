@@ -68,7 +68,7 @@ public class RedisSpout extends BaseRichSpout {
 
 			/* Send data */
 			LinesBatch linesBatch = gson.fromJson(data, LinesBatch.class);
-			String now = String.valueOf(System.currentTimeMillis());
+			long now = System.currentTimeMillis();
 			
 			for (String row : linesBatch.getLines()) {
 				System.out.println("\u001B[31m" + row + "\u001B[0m");
