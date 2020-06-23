@@ -1,20 +1,13 @@
 package com.stirperichard.stormbus;
 
-import com.stirperichard.stormbus.operator.RedisSpout;
+import com.stirperichard.stormbus.operator.*;
 import com.stirperichard.stormbus.utils.TConf;
 import org.apache.storm.Config;
-import org.apache.storm.LocalCluster;
+import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
 
 public class Main {
-
-    public static final int TOP_N = 10;
-    public static int PROFIT_WINDOW = 15 * 60; // in seconds
-    public static int EMPTY_WINDOW = 30 * 60; // in seconds
-    public static String OUTPUT_FILE = "rankings.output";
-
-
 
     public static void main(String[] args) throws Exception {
 	// write your code here
@@ -42,17 +35,20 @@ public class Main {
 
         //Redis
         builder.setSpout("datasource", new RedisSpout(redisUrl, redisPort));
-/*
+
         //Parser
         builder.setBolt("parser", new ParseCSVQuery1())
                 .setNumTasks(numTasks)
                 .shuffleGrouping("datasource");
 
         //Filter
+        /*
         builder.setBolt("convertDateTime", new ConvertDatetime())
                 .setNumTasks(numTasks)
                 .shuffleGrouping("parser");
 
+         */
+/*
         builder.setBolt("metronome", new Metronome())
                 .setNumTasks(numTasksMetronome)
                 .shuffleGrouping("filterByCoordinates");
@@ -77,10 +73,6 @@ public class Main {
         builder.setBolt("globalRank", new GlobalRank(10, rabbitMqHost, rabbitMqUsername, rabbitMqPassword), 1)
                 .setNumTasks(numTasksGlobalRank)
                 .shuffleGrouping("partialRank");
-
-        builder.setBolt("rankings", new RankingBolt(TOP_N)).globalGrouping("profitability");
-
-        builder.setBolt("to_file", new DataWriter(OUTPUT_FILE)).globalGrouping("rankings");
 */
         StormTopology stormTopology = builder.createTopology();
 
@@ -103,15 +95,7 @@ public class Main {
         }
 
         // cluster
-        //StormSubmitter.submitTopology(args[0], conf, stormTopology);
-        LocalCluster cluster = new LocalCluster();
-        cluster.submitTopology("test", conf, builder.createTopology());
-        /*
-        Utils.sleep(10000);
-        cluster.killTopology("test");
-        cluster.shutdown();
-
-         */
+        StormSubmitter.submitTopology(args[0], conf, stormTopology);
 
     }
 }

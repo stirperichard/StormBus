@@ -20,7 +20,7 @@ public class BusRide implements Serializable {
     private String runType;
     private String busNo;
     private String routeNumber;
-    public Reason reason;
+    public String reason;
     private String schoolsServiced;
     public String occurredOn;
     private String createdOn;
@@ -77,11 +77,11 @@ public class BusRide implements Serializable {
         this.routeNumber = routeNumber;
     }
 
-    public Reason getReason() {
+    public String getReason() {
         return reason;
     }
 
-    public void setReason(Reason reason) {
+    public void setReason(String reason) {
         this.reason = reason;
     }
 
@@ -250,26 +250,26 @@ public class BusRide implements Serializable {
     }
 
 
-    private static Reason mappingReason(String reason) {
+    private static String mappingReason(String reason) {
         switch (reason) {
             case "Accident":
-                return Reason.ACCIDENT;
+                return "Accident";
             case "Delayed by School":
-                return Reason.DELAYED_BY_SCHOOL;
+                return "Delayed by School";
             case "Flat Tire":
-                return Reason.FLAT_TIRE;
+                return "Flat Tire";
             case "Heavy Traffic":
-                return Reason.HEAVY_TRAFFIC;
+                return "Heavy Traffic";
             case "Mechanical Problem":
-                return Reason.MECHANICAL_PROBLEM;
+                return "Mechanical Problem";
             case "Problem Run":
-                return Reason.PROBLEM_RUN;
+                return "Problem Run";
             case "Weather Condition":
-                return Reason.WEATHER_CONDITION;
+                return "Weather Condition";
             case "Won't Start":
-                return Reason.WONT_START;
+                return "Won't Start";
             default:
-                return Reason.OTHER;
+                return "Other";
         }
     }
 

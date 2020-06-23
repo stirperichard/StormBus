@@ -1,5 +1,6 @@
 package com.stirperichard.stormbus.operator;
 
+import com.stirperichard.stormbus.utils.TimeUtils;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -25,14 +26,11 @@ public class MetronomeQuery3 extends BaseRichBolt {
     private long latestMsgId = 0;
 
     public MetronomeQuery3(){
-
     }
 
     @Override
     public void prepare(@SuppressWarnings("rawtypes") Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-
         this.collector = outputCollector;
-
     }
 
     @Override
@@ -41,19 +39,20 @@ public class MetronomeQuery3 extends BaseRichBolt {
         /* Emit message every (simulated) minute */
         String busBreakdownId = tuple.getStringByField(DataGenerator.BUS_BREAKDOWN_ID);
         String reason 		= tuple.getStringByField(DataGenerator.REASON);
-        String occurredOn 		= tuple.getStringByField(DataGenerator.OCCURRED_ON);
-        String boro 	= tuple.getStringByField(DataGenerator.BORO);
+        String occurredOn 		= tuple.getStringByField(MetronomeQuery3.F_TIME);
         String busCompanyName 	= tuple.getStringByField(DataGenerator.BUS_COMPANY_NAME);
         String howLongDelayed	= tuple.getStringByField(DataGenerator.HOW_LONG_DELAYED);
 
         long msgId = Long.parseLong(busBreakdownId);
-        long time = roundToCompletedMinute(occurredOn);
+        long time = Long.parseLong(occurredOn);
 
         if (this.latestMsgId < msgId &&
                 this.currentTime < time){
 
             this.latestMsgId = msgId;
-            this.currentTime = time;
+            //this.currentTime = time;
+            this.currentTime = TimeUtils.addHours(occurredOn, 24);
+
 
             Values values = new Values();
             values.add(busBreakdownId);
@@ -65,7 +64,7 @@ public class MetronomeQuery3 extends BaseRichBolt {
             collector.emit(S_METRONOME, values);   // To observe: event time
 
         } else {
-            /* time did not go forward */
+             /* time did not go forward */
         }
 
         collector.ack(tuple);

@@ -50,19 +50,27 @@ public class Query3 {
         TopologyBuilder builder = new TopologyBuilder();
 
         //Redis
-        builder.setSpout("datasource", new DataGenerator(INPUT_FILE));
+        builder.setSpout("dataSource", new DataGenerator(INPUT_FILE));
         //Parser
         builder.setBolt("filterReason", new FilterReason())
                 .setNumTasks(numTasks)
-                .shuffleGrouping("datasource");
+                .fieldsGrouping(
+                        "dataSource",
+                        DataGenerator.PROFIT_STREAM_ID,
+                        new Fields(DataGenerator.BUS_COMPANY_NAME)
+                );
 
-        builder.setBolt("metronome", new Metronome())
+        builder.setBolt("metronome", new MetronomeQuery3())
                 .setNumTasks(numTasksMetronome)
                 .shuffleGrouping("filterReason");
 
+
         builder.setBolt("computeScore", new ComputeScoreByWindow())
                 .setNumTasks(numTasks)
+                .fieldsGrouping("filterReason", new Fields(DataGenerator.BUS_COMPANY_NAME))
                 .allGrouping("metronome", Metronome.S_METRONOME);
+
+
         /*
         builder.setBolt("compute", new FilterReason()
                         .withWindow(

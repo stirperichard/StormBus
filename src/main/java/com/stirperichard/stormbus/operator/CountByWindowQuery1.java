@@ -178,7 +178,8 @@ public class CountByWindowQuery1 extends BaseRichBolt {
         }
 
         /* Time has not moved forward. Update and emit count */
-        Window w = windowPerRoute.get(route);
+        Window w = windowPerRoute.get("route");
+        /*
         if (w == null){
             w = new Window(WINDOW_SIZE);
             windowPerRoute.put(route, w);
@@ -186,14 +187,16 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
         w.increment();
 
+         */
+
         /* Retrieve route frequency in the last 30 mins */
         String count = String.valueOf(w.getEstimatedTotal());
 
         Values values = new Values();
         values.add(msgId);
-        values.add(pickupDatatime);
-        values.add(dropoffDataTime);
-        values.add(route);
+        //values.add(pickupDatatime);
+        //values.add(dropoffDataTime);
+        //values.add(route);
         values.add(count);
         values.add(timestamp);
 
