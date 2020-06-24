@@ -76,20 +76,6 @@ public class Metronome extends BaseRichBolt {
                 this.elapsedTime_m = occurredOnMillis;
 
 
-            // Metronome sends tick every hour
-            if (occurredOnMillis - this.elapsedTime_h >= MILLIS_HOUR) {
-                metronomeID++;
-                this.elapsedTime_h = 0;
-                Values values = new Values();
-                values.add(METRONOME_H);
-                values.add(dayMonth);
-                values.add(occurredOnMillis);
-                values.add(occurredOn);
-                values.add(metronomeID);
-                collector.emit(S_METRONOME, values);
-                System.out.println("\u001B[33m" + "SEND METRONOME HOUR -" + " ID METRONOME: " + metronomeID + "\u001B[0m");
-            }
-
             // Metronome sends tick every day
             if (occurredOnMillis - this.elapsedTime_d >= MILLIS_DAY) {
                 metronomeID++;

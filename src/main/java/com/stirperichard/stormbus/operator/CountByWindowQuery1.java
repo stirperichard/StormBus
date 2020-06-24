@@ -20,30 +20,24 @@ import static com.stirperichard.stormbus.utils.Constants.*;
 
 public class CountByWindowQuery1 extends BaseRichBolt {
 
-    public static final String F_MSGID				= "msgId";
+    public static final String F_MSGID              = "msgId";
     public static final String TIMESTAMP            = "timestamp";  //OccurredOn in millis
-    public static final String OCCURRED_ON       	= "occurredOn";
-    public static final String BORO 	            = "boro";
-    public static final String HOW_LONG_DELAYED 	= "howLongDelayed";
-    public static final String F_TIMESTAMP      	= "timestamp_real";
+    public static final String OCCURRED_ON          = "occurredOn";
+    public static final String BORO                 = "boro";
+    public static final String HOW_LONG_DELAYED     = "howLongDelayed";
+    public static final String F_TIMESTAMP          = "timestamp_real";
     public static final String AVG_DELAY            = "avg_delay";
-    public static final String DAY_PER_MONTH        = "day_per_month";
+    public static final String DAY                  = "day";
+    public static final String WEEK                 = "week";
+    public static final String MONTH                = "month";
+    public static final String TYPE                 = "type";
 
-    public static final String HOUR             = "hour";
-    public static final String DAY              = "day";
-    public static final String WEEK             = "week";
-    public static final String MONTH            = "month";
-
-    private static final long serialVersionUID  = 1L;
+    private static final long serialVersionUID      = 1L;
     private OutputCollector collector;
 
-    private long latestCompletedTimeframeHour, latestCompletedTimeframeDay,
-            latestCompletedTimeframeWeek, latestCompletedTimeframeMonth;
+    private long latestCompletedTimeframeHour, latestCompletedTimeframeDay, latestCompletedTimeframeWeek, latestCompletedTimeframeMonth;
 
-    Map<String, Window> map_hour;
-    Map<String, Window> map_day;
-    Map<String, Window> map_week;
-    Map<String, Window> map_month;
+    Map<String, Window> map_hour, map_day, map_week, map_month;
 
     public static int ID_from_metronome = 0;
     public static int ID_from_parse = 0;
@@ -60,13 +54,12 @@ public class CountByWindowQuery1 extends BaseRichBolt {
      */
 
     public CountByWindowQuery1() {
-
     }
 
     @Override
     public void prepare(@SuppressWarnings("rawtypes") Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
 
-        this.collector=outputCollector;
+        this.collector = outputCollector;
         this.latestCompletedTimeframeHour = 0;
         this.latestCompletedTimeframeMonth = 0;
         this.latestCompletedTimeframeDay = 0;
@@ -80,7 +73,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
-        if (input.getSourceStreamId().equals(Metronome.S_METRONOME)){
+        if (input.getSourceStreamId().equals(Metronome.S_METRONOME)) {
 
             handleMetronomeMessage(input);
 
@@ -90,62 +83,19 @@ public class CountByWindowQuery1 extends BaseRichBolt {
         }
     }
 
-    private void handleMetronomeMessage(Tuple tuple){
+    private void handleMetronomeMessage(Tuple tuple) {
 
-        String msgType              = tuple.getSourceStreamId();
+        String msgType = tuple.getSourceStreamId();
 
         if (msgType.equals(Metronome.S_METRONOME)) {
-            Long time		 		= tuple.getLongByField(Metronome.OCCURREDON_MILLIS);
-            String occurredOn   	= tuple.getStringByField(Metronome.OCCURRED_ON);
-            int dayPerMonth         = tuple.getIntegerByField(Metronome.DAY_IN_MONTH);
-            String typeMetronome    = tuple.getStringByField(Metronome.TYPE_OF_METRONOME);
-            int metronomeID         = tuple.getIntegerByField(Metronome.METRONOME_ID);
+            Long time = tuple.getLongByField(Metronome.OCCURREDON_MILLIS);
+            String occurredOn = tuple.getStringByField(Metronome.OCCURRED_ON);
+            int dayPerMonth = tuple.getIntegerByField(Metronome.DAY_IN_MONTH);
+            String typeMetronome = tuple.getStringByField(Metronome.TYPE_OF_METRONOME);
+            int metronomeID = tuple.getIntegerByField(Metronome.METRONOME_ID);
 
             if (metronomeID > ID_from_metronome) {
                 ID_from_metronome = metronomeID;
-
-                if (typeMetronome.equals(Metronome.METRONOME_H)) {
-                    System.out.println("\u001B[33m" + "RICEVUTO METRONOMO HOUR" + " WITH ID: " + metronomeID + "\u001B[0m");
-                    long latestTimeframe = TimeUtils.roundToCompletedHour(time);
-
-                    if (this.latestCompletedTimeframeHour < latestTimeframe) {
-
-                        int elapsedHour = (int) Math.ceil((latestTimeframe - this.latestCompletedTimeframeHour) / (MILLIS_HOUR));
-                        List<String> expiredRoutes = new ArrayList<>();
-
-                        for (String boro : map_hour.keySet()) {
-
-                            Window w = map_hour.get(boro);
-                            if (w == null) {
-                                continue;
-                            }
-
-                            float delayPerBoroPerHour = w.getEstimatedTotal();
-
-                            w.moveForward(elapsedHour);
-
-                            /* Reduce memory by removing windows with no data */
-                            expiredRoutes.add(boro);
-
-                            Values v = new Values();
-                            v.add(occurredOn);
-                            v.add(boro);
-                            v.add(delayPerBoroPerHour);
-                            v.add(time);
-
-                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerHour + " latestCompletedTimeframeHour: "+ latestCompletedTimeframeHour + "]" + "\u001B[0m");
-
-                            collector.emit(HOUR, v);
-                        }
-
-                        /* Reduce memory by removing windows with no data */
-                        for (String r : expiredRoutes) {
-                            map_hour.remove(r);
-                        }
-
-                        this.latestCompletedTimeframeHour = latestTimeframe;
-                    }
-                }
 
                 if (typeMetronome.equals(Metronome.METRONOME_D)) {
                     System.out.println("\u001B[33m" + "RICEVUTO METRONOMO DAY" + " WITH ID: " + metronomeID + "\u001B[0m");
@@ -171,17 +121,11 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                             /* Reduce memory by removing windows with no data */
                             expiredRoutes.add(boro);
 
-                            Values v = new Values();
-                            v.add(occurredOn);
-                            v.add(boro);
-                            v.add(avgPerBoroPerDay);
-                            v.add(time);
+                            Values v = new Values(DAY, occurredOn, boro, avgPerBoroPerDay, time);
 
                             System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerDay + " TIME: " + time + "]" + "\u001B[0m");
 
-                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + avgPerBoroPerDay + "]" + "\u001B[0m");
-
-                            collector.emit(DAY, v);
+                            collector.emit(v);
                         }
 
                         /* Reduce memory by removing windows with no data */
@@ -218,17 +162,11 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                             /* Reduce memory by removing windows with no data */
                             expiredRoutes.add(boro);
 
-                            Values v = new Values();
-                            v.add(occurredOn);
-                            v.add(boro);
-                            v.add(avgDelayPerBoroPerWeek);
-                            v.add(time);
+                            Values v = new Values(WEEK, occurredOn, boro, avgDelayPerBoroPerWeek, time);
 
                             System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerWeek + " TIME: " + time + "]" + "\u001B[0m");
 
-                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + avgDelayPerBoroPerWeek + "]" + "\u001B[0m");
-
-                            collector.emit(WEEK, v);
+                            collector.emit(v);
                         }
 
                         /* Reduce memory by removing windows with no data */
@@ -267,18 +205,11 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                             /* Reduce memory by removing windows with no data */
                             expiredRoutes.add(boro);
 
-                            Values v = new Values();
-                            v.add(occurredOn);
-                            v.add(boro);
-                            v.add(avgDelayPerBoroPerMonth);
-                            v.add(time);
+                            Values v = new Values(MONTH, occurredOn, boro, avgDelayPerBoroPerMonth, time);
 
                             System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerMonth + " TIME: " + time + "]" + "\u001B[0m");
 
-                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + avgDelayPerBoroPerMonth + "]" + "\u001B[0m");
-
-
-                            collector.emit(MONTH, v);
+                            collector.emit(v);
                         }
 
                         /* Reduce memory by removing windows with no data */
@@ -296,96 +227,39 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
     }
 
-    private void handleBusData(Tuple tuple){
+    private void handleBusData(Tuple tuple) {
 
-        String boro 			= tuple.getStringByField(ParseCSV.BORO);
-        String occurredOn   	= tuple.getStringByField(ParseCSV.OCCURRED_ON);
-        int howLongDelayed	    = tuple.getIntegerByField(ParseCSV.HOW_LONG_DELAYED);
-        long time               = tuple.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
-        int dayPerMonth         = tuple.getIntegerByField(ParseCSV.DAY_IN_MONTH);
-        int msgID               = tuple.getIntegerByField(ParseCSV.F_MSGID);
+        String boro = tuple.getStringByField(ParseCSV.BORO);
+        String occurredOn = tuple.getStringByField(ParseCSV.OCCURRED_ON);
+        int howLongDelayed = tuple.getIntegerByField(ParseCSV.HOW_LONG_DELAYED);
+        long time = tuple.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
+        int dayPerMonth = tuple.getIntegerByField(ParseCSV.DAY_IN_MONTH);
+        int msgID = tuple.getIntegerByField(ParseCSV.F_MSGID);
 
+        if (boro.isEmpty()) {
+            collector.ack(tuple);
+            return;
+        }
 
-        if (msgID > ID_from_parse){
+        if (msgID > ID_from_parse) {
 
             ID_from_parse = msgID;
 
-            long latestTimeframeHour = TimeUtils.roundToCompletedHour(time);
             long latestTimeframeDay = TimeUtils.roundToCompletedDay(time);
             long latestTimeframeWeek = TimeUtils.lastWeek(time);
             long latestTimeframeMonth = TimeUtils.lastMonth(time);
 
-            if (this.latestCompletedTimeframeHour < latestTimeframeHour){
-
-                System.out.println("\u001B[36m" + "[" + "MSG ID: " + msgID + " DATA HOUR" + "]" + "\u001B[0m");
-                System.out.println("\u001B[36m" + "[" + map_hour + "]" + "\u001B[0m");
-
-                int elapsedHour = (int) Math.ceil((latestTimeframeHour - this.latestCompletedTimeframeHour) / (MILLIS_HOUR));
-                List<String> expiredRoutes = new ArrayList<>();
-
-                System.out.println("INIZIO DELLA FINESTRA TUMBLING " + TimeUtils.roundToCompletedHour(time));
-
-                for (String r : map_hour.keySet()){
-
-                    Window w = map_hour.get(r);
-                    if (w == null){
-                        continue;
-                    }
-
-                    float delayPerBoroPerHour = w.getEstimatedTotal() / w.getCounter();
-
-                    w.moveForward(elapsedHour);
-
-                    // Reduce memory by removing windows with no data
-                    expiredRoutes.add(r);
-
-                    Values v = new Values();
-                    v.add(occurredOn);
-                    v.add(r);
-                    v.add(delayPerBoroPerHour);
-                    v.add(time);
-
-                    System.out.println("EVENT OCCURRED AT:" + TimeUtils.retriveDataFromMillis(time) + " BORO: " + r + " AVG BORO PER HOUR: " + delayPerBoroPerHour);
-
-                    collector.emit(HOUR, v);
-                }
-
-                // Reduce memory by removing windows with no data
-                for (String r : expiredRoutes){
-                    map_hour.remove(r);
-                }
-
-                Window wH = map_hour.get(boro);
-                if (wH == null) {
-                    wH = new Window(1);
-                    map_hour.put(boro, wH);
-                }
-                wH.increment(howLongDelayed);
-
-                this.latestCompletedTimeframeHour = latestTimeframeHour;
-
-            } else {
-                //HOUR
-                /* Time has not moved forward. Update and emit count */
-                Window wH = map_hour.get(boro);
-                if (wH == null) {
-                    wH = new Window(1);
-                    map_hour.put(boro, wH);
-                }
-                wH.increment(howLongDelayed);
-            }
-
-            if (this.latestCompletedTimeframeDay < latestTimeframeDay){
+            if (this.latestCompletedTimeframeDay < latestTimeframeDay) {
                 System.out.println("\u001B[36m" + "[" + "DATA DAY" + "]" + "\u001B[0m");
                 System.out.println("\u001B[36m" + "[" + map_day + "]" + "\u001B[0m");
 
                 int elapsedDay = (int) Math.ceil((latestTimeframeDay - this.latestCompletedTimeframeDay) / (MILLIS_DAY));
                 List<String> expiredRoutes = new ArrayList<>();
 
-                for (String r : map_day.keySet()){
+                for (String r : map_day.keySet()) {
 
                     Window w = map_day.get(r);
-                    if (w == null){
+                    if (w == null) {
                         continue;
                     }
 
@@ -398,41 +272,32 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     // Reduce memory by removing windows with no data
                     expiredRoutes.add(r);
 
-                    Values v = new Values();
-                    v.add(occurredOn);
-                    v.add(r);
-                    v.add(avgPerBoroPerDay);
-                    v.add(time);
+                    Values v = new Values(DAY, occurredOn, r, avgPerBoroPerDay, time);
 
                     System.out.println("EVENT OCCURRED AT:" + occurredOn + " BORO: " + r + " AVG BORO PER DAY: " + avgPerBoroPerDay);
 
-                    collector.emit(DAY, v);
+                    collector.emit(v);
                 }
 
                 // Reduce memory by removing windows with no data
-                for (String r : expiredRoutes){
+                for (String r : expiredRoutes) {
                     map_day.remove(r);
                 }
 
-                Window wD = map_day.get(boro);
-                if (wD == null) {
-                    wD = new Window(1);
-                    map_day.put(boro, wD);
-                }
-                wD.increment(howLongDelayed);
 
                 this.latestCompletedTimeframeDay = latestTimeframeDay;
 
-            } else {
-                //DAYS
-                /* Time has not moved forward. Update and emit count */
-                Window wD = map_day.get(boro);
-                if (wD == null) {
-                    wD = new Window(1);
-                    map_day.put(boro, wD);
-                }
-                wD.increment(howLongDelayed);
             }
+
+            //DAYS
+            /* Time has not moved forward. Update and emit count */
+            Window wD = map_day.get(boro);
+            if (wD == null) {
+                wD = new Window(1);
+                map_day.put(boro, wD);
+            }
+            wD.increment(howLongDelayed);
+
 
             if (this.latestCompletedTimeframeWeek < latestTimeframeWeek) {
                 System.out.println("\u001B[36m" + "[" + "DATA WEEK" + "]" + "\u001B[0m");
@@ -456,13 +321,9 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     //Reduce memory by removing windows with no data
                     expiredRoutes.add(r);
 
-                    Values v = new Values();
-                    v.add(occurredOn);
-                    v.add(r);
-                    v.add(avgDelayPerBoroPerWeek);
-                    v.add(time);
+                    Values v = new Values(WEEK, occurredOn, r, avgDelayPerBoroPerWeek, time);
 
-                    collector.emit(WEEK, v);
+                    collector.emit(v);
                 }
 
                 // Reduce memory by removing windows with no data
@@ -470,24 +331,19 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     map_week.remove(r);
                 }
 
-                Window wW = map_week.get(boro);
-                if (wW == null) {
-                    wW = new Window(1);
-                    map_week.put(boro, wW);
-                }
-                wW.increment(howLongDelayed);
-
                 this.latestCompletedTimeframeWeek = latestTimeframeWeek;
-            } else {
-                //WEEK
-                /* Time has not moved forward. Update and emit count */
-                Window wW = map_week.get(boro);
-                if (wW == null) {
-                    wW = new Window(1);
-                    map_week.put(boro, wW);
-                }
-                wW.increment(howLongDelayed);
+
             }
+
+            //WEEK
+            /* Time has not moved forward. Update and emit count */
+            Window wW = map_week.get(boro);
+            if (wW == null) {
+                wW = new Window(1);
+                map_week.put(boro, wW);
+            }
+            wW.increment(howLongDelayed);
+
 
             if (this.latestCompletedTimeframeMonth < latestTimeframeMonth) {
                 System.out.println("\u001B[36m" + "[" + "DATA MESE" + "]" + "\u001B[0m");
@@ -511,13 +367,9 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     // Reduce memory by removing windows with no data
                     expiredRoutes.add(r);
 
-                    Values v = new Values();
-                    v.add(occurredOn);
-                    v.add(r);
-                    v.add(avgDelayPerBoroPerMonth);
-                    v.add(time);
+                    Values v = new Values(MONTH, occurredOn, r, avgDelayPerBoroPerMonth, time);
 
-                    collector.emit(MONTH, v);
+                    collector.emit(v);
                 }
 
                 // Reduce memory by removing windows with no data
@@ -525,25 +377,20 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     map_month.remove(r);
                 }
 
-                Window wM = map_month.get(boro);
-                if (wM == null) {
-                    wM = new Window(1);
-                    map_month.put(boro, wM);
-                }
-                wM.increment(howLongDelayed);
 
                 this.latestCompletedTimeframeMonth = latestTimeframeMonth;
 
-            } else {
-                //MONTH
-                /* Time has not moved forward. Update and emit count */
-                Window wM = map_month.get(boro);
-                if (wM == null) {
-                    wM = new Window(1);
-                    map_month.put(boro, wM);
-                }
-                wM.increment(howLongDelayed);
             }
+
+            //MONTH
+            /* Time has not moved forward. Update and emit count */
+            Window wM = map_month.get(boro);
+            if (wM == null) {
+                wM = new Window(1);
+                map_month.put(boro, wM);
+            }
+            wM.increment(howLongDelayed);
+
         }
 
         //ACK
@@ -554,6 +401,6 @@ public class CountByWindowQuery1 extends BaseRichBolt {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
 
-        outputFieldsDeclarer.declare(new Fields(F_MSGID, OCCURRED_ON, AVG_DELAY, TIMESTAMP, F_TIMESTAMP));
+        outputFieldsDeclarer.declare(new Fields(TYPE, F_MSGID, OCCURRED_ON, AVG_DELAY, TIMESTAMP, F_TIMESTAMP));
     }
 }

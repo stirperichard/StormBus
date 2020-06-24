@@ -89,12 +89,7 @@ public class ParseCSV extends BaseRichBolt {
             }
 
             //Controllo la validità e aggiungo il valore della varibile Boro (campo 9)
-            if (!data[9].isEmpty()) {
-                values.add(data[9]);
-            } else {
-                collector.ack(input);
-                return;
-            }
+            values.add(data[9]);
 
 
             //Controllo la validità e aggiungo il valore della varibile Bus_Company_Name (campo 10)

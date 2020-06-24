@@ -51,7 +51,6 @@ public class FilterByTime extends BaseRichBolt {
 
         try {
             hour = TimeUtils.getInfoDateHour(occurredOn);
-            System.out.println(hour);
         } catch (ParseException e) {
             e.printStackTrace();
             collector.ack(tuple);
