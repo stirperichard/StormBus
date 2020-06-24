@@ -1,5 +1,6 @@
 package com.stirperichard.stormbus.operator;
 
+import com.stirperichard.stormbus.utils.TimeUtils;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -32,7 +33,6 @@ public class Metronome extends BaseRichBolt {
 
     private OutputCollector collector;
 
-    private long elapsedTime_h;
     private long elapsedTime_d;
     private long elapsedTime_w;
     private long elapsedTime_m;
@@ -45,7 +45,6 @@ public class Metronome extends BaseRichBolt {
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector outputCollector) {
         this.collector = outputCollector;
-        this.elapsedTime_h = 0;
         this.elapsedTime_d = 0;
         this.elapsedTime_w = 0;
         this.elapsedTime_m = 0;
@@ -66,18 +65,17 @@ public class Metronome extends BaseRichBolt {
 
             MILLIS_MONTH = dayMonth * MILLIS_DAY;
 
-            if (this.elapsedTime_h == 0)
-                this.elapsedTime_h = occurredOnMillis;
+
             if (this.elapsedTime_d == 0)
-                this.elapsedTime_d = occurredOnMillis;
+                this.elapsedTime_d = TimeUtils.roundToCompletedDay(occurredOnMillis) ;
             if (this.elapsedTime_w == 0)
-                this.elapsedTime_w = occurredOnMillis;
+                this.elapsedTime_w = TimeUtils.lastWeek(occurredOnMillis);
             if (this.elapsedTime_m == 0)
-                this.elapsedTime_m = occurredOnMillis;
+                this.elapsedTime_m = TimeUtils.lastMonth(occurredOnMillis);
 
 
             // Metronome sends tick every day
-            if (occurredOnMillis - this.elapsedTime_d >= MILLIS_DAY) {
+            if (TimeUtils.roundToCompletedDay(occurredOnMillis) - this.elapsedTime_d >= MILLIS_DAY) {
                 metronomeID++;
                 this.elapsedTime_d = 0;
                 Values values = new Values();
@@ -91,7 +89,7 @@ public class Metronome extends BaseRichBolt {
             }
 
             // Metronome sends tick every week
-            if (occurredOnMillis - this.elapsedTime_w >= MILLIS_WEEK) {
+            if (TimeUtils.lastWeek(occurredOnMillis) - this.elapsedTime_w >= MILLIS_WEEK) {
                 metronomeID++;
                 this.elapsedTime_w = 0;
                 Values values = new Values();
@@ -105,7 +103,7 @@ public class Metronome extends BaseRichBolt {
             }
 
             // Metronome sends tick every month
-            if (occurredOnMillis - this.elapsedTime_m >= MILLIS_MONTH) {
+            if (TimeUtils.lastMonth(occurredOnMillis) - this.elapsedTime_m >= MILLIS_MONTH) {
                 metronomeID++;
                 this.elapsedTime_m = 0;
                 Values values = new Values();

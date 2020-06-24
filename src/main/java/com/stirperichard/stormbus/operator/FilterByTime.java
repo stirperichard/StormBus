@@ -31,6 +31,9 @@ public class FilterByTime extends BaseRichBolt {
     private OutputCollector collector;
     private SimpleDateFormat sdf;
 
+    public static int filterIDMsg = 0;
+
+
     public FilterByTime() {
     }
 
@@ -47,41 +50,35 @@ public class FilterByTime extends BaseRichBolt {
         String reason           = tuple.getStringByField(ParseCSV.REASON);
         long occurredOnMillis	= tuple.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
 
-        int hour;
+        if(filterIDMsg < msgId) {
 
-        try {
-            hour = TimeUtils.getInfoDateHour(occurredOn);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            collector.ack(tuple);
-            return;
-        }
+            filterIDMsg = msgId;
+            int hour;
 
-        if (hour < 5 || hour > 19){
-            collector.ack(tuple);
-            return;
+            try {
+                hour = TimeUtils.getInfoDateHour(occurredOn);
+            } catch (ParseException e) {
+                e.printStackTrace();
+                collector.ack(tuple);
+                return;
+            }
 
-        } else if ((hour < 12) && (hour >= 5)) {
-            Values values = new Values();
-            values.add(msgId);
-            values.add(occurredOn);
-            values.add(reason);
-            values.add(occurredOnMillis);
-            values.add(MORNING);
+            if (hour < 5 || hour > 19) {
+                collector.ack(tuple);
+                return;
 
-            collector.emit(values);
-            collector.ack(tuple);
+            } else if ((hour < 12) && (hour >= 5)) {
+                Values values = new Values(msgId, occurredOn, reason, occurredOnMillis, MORNING);
 
-        } else {
-            Values values = new Values();
-            values.add(msgId);
-            values.add(occurredOn);
-            values.add(reason);
-            values.add(occurredOnMillis);
-            values.add(AFTERNOON);
+                collector.emit(values);
+                collector.ack(tuple);
 
-            collector.emit(values);
-            collector.ack(tuple);
+            } else {
+                Values values = new Values(msgId, occurredOn, reason, occurredOnMillis, AFTERNOON);
+
+                collector.emit(values);
+                collector.ack(tuple);
+            }
         }
     }
 

@@ -64,7 +64,7 @@ public class ParseCSV extends BaseRichBolt {
                 return;
             }
 
-            System.out.println("\u001B[31m" + rawData + "\u001B[0m");
+            //System.out.println("\u001B[31m" + rawData + "\u001B[0m");
 
             Values values = new Values();
 

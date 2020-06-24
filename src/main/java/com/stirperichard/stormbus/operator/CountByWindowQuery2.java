@@ -111,7 +111,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                                 continue;
                             }
 
-                            long numberOfDelays = w.getCounter();
+                            long numberOfDelays = w.getEstimatedTotal();
 
                             w.moveForward(elapsedDay);
 
@@ -151,7 +151,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                                 continue;
                             }
 
-                            long numberOfDelays = w.getCounter();
+                            long numberOfDelays = w.getEstimatedTotal();
 
                             w.moveForward(elapsedWeek);
 
@@ -189,9 +189,9 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
 
         if (this.latestCompletedTimeframeWeek == 0)
-            this.latestCompletedTimeframeWeek = time;
+            this.latestCompletedTimeframeWeek = TimeUtils.roundToCompletedDay(time);
         if(this.latestCompletedTimeframeDay == 0)
-            this.latestCompletedTimeframeDay = time;
+            this.latestCompletedTimeframeDay = TimeUtils.lastWeek(time);
 
 
         if (msgID > ID_from_parseQ2) {
@@ -215,7 +215,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                             continue;
                         }
 
-                        long numberOfDelays = w.getCounter();
+                        long numberOfDelays = w.getEstimatedTotal();
 
                         w.moveForward(elapsedDay);
 
@@ -235,7 +235,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                             continue;
                         }
 
-                        long numberOfDelays = w.getCounter();
+                        long numberOfDelays = w.getEstimatedTotal();
 
                         w.moveForward(elapsedDay);
 
@@ -260,22 +260,20 @@ public class CountByWindowQuery2 extends BaseRichBolt {
             }
 
             if (type.equals(FilterByTime.MORNING)) {
-                Window wD = map_day_morning.get(reason);
-                System.out.println("\u001B[35m" + "ADDING ON MORNING - REASON:   " + reason + "    FROM MSG ID:  " + msgID + "\u001B[0m"); //PRINT PURPLE
-                if (wD == null) {
-                    wD = new Window(1);
-                    map_day_morning.put(reason, wD);
+                Window wDM = map_day_morning.get(reason);
+                if (wDM == null) {
+                    wDM = new Window(1);
+                    map_day_morning.put(reason, wDM);
                 }
-                wD.increment(1);
+                wDM.increment(1);
 
             } else if (type.equals(FilterByTime.AFTERNOON)) {
-                System.out.println("\u001B[35m" + "ADDING ON AFTERNOON - REASON:   " + reason + "    FROM MSG ID:  " + msgID + "\u001B[0m"); //PRINT PURPLE
-                Window wD = map_day_afternoon.get(reason);
-                if (wD == null) {
-                    wD = new Window(1);
-                    map_day_afternoon.put(reason, wD);
+                Window wDA = map_day_afternoon.get(reason);
+                if (wDA == null) {
+                    wDA = new Window(1);
+                    map_day_afternoon.put(reason, wDA);
                 }
-                wD.increment(1);
+                wDA.increment(1);
 
             }
 
@@ -297,15 +295,13 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                             continue;
                         }
 
-                        long numberOfDelays = w.getCounter();
+                        long numberOfDelays = w.getEstimatedTotal();
                         w.moveForward(elapsedWeek);
 
                         //Reduce memory by removing windows with no data
                         expiredRoutes.add(r);
 
                         Values v = new Values(WEEK, occurredOn, r, numberOfDelays, time);
-
-                        System.out.println("EVENT OCCURRED AT:" + occurredOn + " REASON: " + r + " NUMBER OF DELAYS PER REASON MORNING WEEK: " + numberOfDelays);
 
                         collector.emit(v);
                     }
@@ -318,7 +314,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                             continue;
                         }
 
-                        long numberOfDelays = w.getCounter();
+                        long numberOfDelays = w.getEstimatedTotal();
 
                         w.moveForward(elapsedWeek);
 
@@ -326,8 +322,6 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                         expiredRoutes.add(r);
 
                         Values v = new Values(WEEK, occurredOn, r, numberOfDelays, time);
-
-                        System.out.println("EVENT OCCURRED AT:" + occurredOn + " REASON: " + r + " NUMBER OF DELAYS PER REASON AFTERNOON WEEK: " + numberOfDelays);
 
                         collector.emit(v);
                     }
@@ -343,19 +337,19 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
             }
             if (type.equals(FilterByTime.MORNING)) {
-                Window wD = map_week_morning.get(reason);
-                if (wD == null) {
-                    wD = new Window(1);
-                    map_week_morning.put(reason, wD);
+                Window wWM = map_week_morning.get(reason);
+                if (wWM == null) {
+                    wWM = new Window(1);
+                    map_week_morning.put(reason, wWM);
                 }
-                wD.increment(1);
+                wWM.increment(1);
             } else if (type.equals(FilterByTime.AFTERNOON)) {
-                Window wD = map_week_afternoon.get(reason);
-                if (wD == null) {
-                    wD = new Window(1);
-                    map_week_afternoon.put(reason, wD);
+                Window wWA = map_week_afternoon.get(reason);
+                if (wWA == null) {
+                    wWA = new Window(1);
+                    map_week_afternoon.put(reason, wWA);
                 }
-                wD.increment(1);
+                wWA.increment(1);
             }
 
         }

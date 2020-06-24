@@ -47,6 +47,7 @@ public class Window {
 		for (int i = 0; i < positions; i++){
 			cumulativeValue += moveForward();
 		}
+		counter = 0;
 		
 		return cumulativeValue;
 	}

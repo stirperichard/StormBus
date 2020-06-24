@@ -44,7 +44,7 @@ public class Query2 {
 
         builder.setBolt("filterbytime", new FilterByTime())
                 .setNumTasks(numTasks)
-                .shuffleGrouping("parser");
+                .allGrouping("parser");
 
         //Metronome
         builder.setBolt("metronome", new Metronome())
