@@ -13,7 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 
-public class FilterByTime extends BaseRichBolt {
+public class FilterByTimeQ2 extends BaseRichBolt {
 
     public static final String F_MSGID				= "MSGID";
     public static final String OCCURRED_ON       	= "occurredOn";
@@ -34,7 +34,7 @@ public class FilterByTime extends BaseRichBolt {
     public static int filterIDMsg = 0;
 
 
-    public FilterByTime() {
+    public FilterByTimeQ2() {
     }
 
     @Override

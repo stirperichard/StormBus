@@ -24,7 +24,6 @@ public class CountByWindowQuery1 extends BaseRichBolt {
     public static final String TIMESTAMP            = "timestamp";  //OccurredOn in millis
     public static final String OCCURRED_ON          = "occurredOn";
     public static final String BORO                 = "boro";
-    public static final String HOW_LONG_DELAYED     = "howLongDelayed";
     public static final String F_TIMESTAMP          = "timestamp_real";
     public static final String AVG_DELAY            = "avg_delay";
     public static final String DAY                  = "day";
@@ -121,9 +120,9 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                             /* Reduce memory by removing windows with no data */
                             expiredRoutes.add(boro);
 
-                            Values v = new Values(DAY, occurredOn, boro, avgPerBoroPerDay, time);
+                            Values v = new Values(DAY, occurredOn, boro, avgPerBoroPerDay, latestCompletedTimeframeDay);
 
-                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerDay + " TIME: " + time + "]" + "\u001B[0m");
+                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerDay + " TIME BASE: " + latestCompletedTimeframeDay + "]" + "\u001B[0m");
 
                             collector.emit(v);
                         }
@@ -162,9 +161,9 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                             /* Reduce memory by removing windows with no data */
                             expiredRoutes.add(boro);
 
-                            Values v = new Values(WEEK, occurredOn, boro, avgDelayPerBoroPerWeek, time);
+                            Values v = new Values(WEEK, occurredOn, boro, avgDelayPerBoroPerWeek, latestCompletedTimeframeWeek);
 
-                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerWeek + " TIME: " + time + "]" + "\u001B[0m");
+                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerWeek + " TIME BASE: " + latestCompletedTimeframeWeek + "]" + "\u001B[0m");
 
                             collector.emit(v);
                         }
@@ -205,9 +204,9 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                             /* Reduce memory by removing windows with no data */
                             expiredRoutes.add(boro);
 
-                            Values v = new Values(MONTH, occurredOn, boro, avgDelayPerBoroPerMonth, time);
+                            Values v = new Values(MONTH, occurredOn, boro, avgDelayPerBoroPerMonth, latestCompletedTimeframeMonth);
 
-                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerMonth + " TIME: " + time + "]" + "\u001B[0m");
+                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerMonth + " TIME BASE: " + latestCompletedTimeframeMonth + "]" + "\u001B[0m");
 
                             collector.emit(v);
                         }

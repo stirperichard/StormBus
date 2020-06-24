@@ -8,8 +8,8 @@ public class RankItemComparator implements Comparator<RankItem> {
 	public int compare(RankItem o1, RankItem o2) {
 		
 		if (o1.getFrequency() == o2.getFrequency() 
-				&& !o1.getRoute().equals(o2.getRoute())){
-			return - (int) (o1.getTimestamp() - o2.getTimestamp());
+				&& !o1.getReason().equals(o2.getReason())){
+			return - (int) (o1.getBasetime() - o2.getBasetime());
 		}
 		
 		return -(o1.getFrequency() - o2.getFrequency());

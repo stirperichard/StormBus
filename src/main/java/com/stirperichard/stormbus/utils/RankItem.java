@@ -6,18 +6,18 @@ public class RankItem implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 
-	private String route; 
+	private String reason;
 	private int frequency;
-	private long timestamp;
+	private long basetime;
 	
 	public RankItem() {
 	}
 	
-	public RankItem(String route, int frequency, long timestamp) {
+	public RankItem(String reason, int frequency, long basetime) {
 		super();
-		this.route = route;
+		this.reason = reason;
 		this.frequency = frequency;
-		this.timestamp = timestamp;
+		this.basetime = basetime;
 	}
 
 	public int getFrequency() {
@@ -28,20 +28,20 @@ public class RankItem implements Serializable{
 		this.frequency = frequency;
 	}
 
-	public String getRoute() {
-		return route;
+	public String getReason() {
+		return reason;
 	}
 
-	public void setRoute(String route) {
-		this.route = route;
+	public void setReason(String reason) {
+		this.reason = reason;
 	} 
 	
-	public long getTimestamp() {
-		return timestamp;
+	public long getBasetime() {
+		return basetime;
 	}
 
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
+	public void setBasetime(long basetime) {
+		this.basetime = basetime;
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class RankItem implements Serializable{
 
 		com.stirperichard.stormbus.utils.RankItem other = (com.stirperichard.stormbus.utils.RankItem) obj;
 		
-		if (this.route.equals(other.route))
+		if (this.reason.equals(other.reason))
 			return true;
 		
 		return false;
@@ -60,6 +60,6 @@ public class RankItem implements Serializable{
 	
 	@Override
 	public String toString() {
-		return route + ":" + String.valueOf(frequency);
+		return reason + ":" + String.valueOf(frequency);
 	}
 }

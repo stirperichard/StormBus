@@ -42,7 +42,7 @@ public class Query2 {
                 .setNumTasks(numTasks)
                 .allGrouping("datasource");
 
-        builder.setBolt("filterbytime", new FilterByTime())
+        builder.setBolt("filterbytime", new FilterByTimeQ2())
                 .setNumTasks(numTasks)
                 .allGrouping("parser");
 
@@ -61,15 +61,14 @@ public class Query2 {
         PartialRank can be distributed and parallelized,
         whereas TotalRank is centralized and computes the global ranking */
 /*
-        builder.setBolt("partialRank", new PartialRank(10))
+        builder.setBolt("partialRank", new PartialRankQ2(3))
                 .setNumTasks(numTasks)
-                .fieldsGrouping("countByWindow", new Fields(ComputeCellID.F_ROUTE));
+                .fieldsGrouping("countByWindow2", new Fields(CountByWindowQuery2.TYPE));
 
-        builder.setBolt("globalRank", new GlobalRank(10, rabbitMqHost, rabbitMqUsername, rabbitMqPassword), 1)
+        builder.setBolt("globalRank", new GlobalRank(3))
                 .setNumTasks(numTasksGlobalRank)
-                .shuffleGrouping("partialRank");
-
-        builder.setBolt("rankings", new RankingBolt(TOP_N)).globalGrouping("profitability");
+                .allGrouping("partialRank");
+/*
 
         builder.setBolt("to_file", new DataWriter(OUTPUT_FILE)).globalGrouping("rankings");
 */
