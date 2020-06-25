@@ -12,22 +12,9 @@ import org.apache.storm.tuple.Values;
 import java.util.Map;
 
 import static com.stirperichard.stormbus.utils.Constants.*;
-import static com.stirperichard.stormbus.utils.Constants.MILLIS_MONTH;
 
 
 public class Metronome extends BaseRichBolt {
-
-    public static final String S_METRONOME          = "sMetronome";
-    public static final String F_MSGID              = "msgId";
-    public static final String OCCURREDON_MILLIS    = "time";
-    public static final String OCCURRED_ON          = "occurredOn";
-    public static final String METRONOME_H          = "metronome_hour";
-    public static final String METRONOME_D          = "metronome_day";
-    public static final String METRONOME_W          = "metronome_week";
-    public static final String METRONOME_M          = "metronome_month";
-    public static final String DAY_IN_MONTH         = "day_in_month";
-    public static final String TYPE_OF_METRONOME    = "type";
-    public static final String METRONOME_ID         = "metronomeID";
 
     public static int prevIDMetronome;
 
@@ -53,10 +40,10 @@ public class Metronome extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
 
-        int ID                  = input.getIntegerByField(ParseCSV.F_MSGID);
-        String occurredOn       = input.getStringByField(ParseCSV.OCCURRED_ON);
-        long occurredOnMillis   = input.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
-        int dayMonth            = input.getIntegerByField(ParseCSV.DAY_IN_MONTH);
+        int ID                  = input.getIntegerByField(F_MSGID);
+        String occurredOn       = input.getStringByField(OCCURRED_ON);
+        long occurredOnMillis   = input.getLongByField(OCCURREDON_MILLIS);
+        int dayMonth            = input.getIntegerByField(DAY_IN_MONTH);
 
 
         if(ID > prevIDMetronome){

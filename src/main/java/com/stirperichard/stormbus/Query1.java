@@ -1,12 +1,17 @@
 package com.stirperichard.stormbus;
 
-import com.stirperichard.stormbus.operator.*;
+import com.stirperichard.stormbus.operator.CountByWindowQuery1;
+import com.stirperichard.stormbus.operator.DataGeneratorQ1;
+import com.stirperichard.stormbus.operator.Metronome;
+import com.stirperichard.stormbus.operator.ParseCSV;
 import com.stirperichard.stormbus.utils.TConf;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
+
+import static com.stirperichard.stormbus.utils.Constants.S_METRONOME;
 
 public class Query1 {
 
@@ -54,7 +59,7 @@ public class Query1 {
         builder.setBolt("countByWindow", new CountByWindowQuery1())
                 .setNumTasks(numTasks)
                 .allGrouping("parser")
-                .allGrouping("metronome", Metronome.S_METRONOME);
+                .allGrouping("metronome", S_METRONOME);
 
         /*
         builder.setBolt("to_file", new DataWriter(OUTPUT_PATH))

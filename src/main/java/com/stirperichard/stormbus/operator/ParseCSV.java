@@ -1,7 +1,6 @@
 package com.stirperichard.stormbus.operator;
 
 import com.stirperichard.stormbus.enums.Reason;
-import com.stirperichard.stormbus.utils.Constants;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -16,19 +15,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
+import static com.stirperichard.stormbus.utils.Constants.*;
 import static com.stirperichard.stormbus.utils.ParseTime.minutesDelayed;
 
 public class ParseCSV extends BaseRichBolt {
 
-    public static final String F_MSGID = "MSGID";
-    public static final String OCCURRED_ON = "occurredOn";
-    public static final String BORO = "boro";
-    public static final String REASON = "reason";
-    public static final String HOW_LONG_DELAYED = "howLongDelayed";
-    public static final String BUS_COMPANY_NAME = "busCompanyName";
-    public static final String F_TIMESTAMP = "timestamp";
-    public static final String OCCURRED_ON_MILLIS = "occurred_on_millis";
-    public static final String DAY_IN_MONTH = "day_in_month";
 
     private OutputCollector collector;
     private SimpleDateFormat sdf;
@@ -44,14 +35,14 @@ public class ParseCSV extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
-        String rawData = input.getStringByField(DataGeneratorQ1.DATA);
-        long occurredOnMillis = input.getLongByField(DataGeneratorQ1.OCCURRED_ON);
-        int ID = input.getIntegerByField(DataGeneratorQ1.ID);
+        String rawData = input.getStringByField(DATA);
+        long occurredOnMillis = input.getLongByField(OCCURRED_ON);
+        int id = input.getIntegerByField(ID);
 
-        if (ID > prevID) {
-            prevID = ID;
+        if (id > prevID) {
+            prevID = id;
             /* Do NOT emit if the EOF has been reached */
-            if (rawData == null || rawData.equals(Constants.REDIS_EOF)) {
+            if (rawData == null || rawData.equals(REDIS_EOF)) {
                 collector.ack(input);
                 return;
             }
@@ -69,7 +60,7 @@ public class ParseCSV extends BaseRichBolt {
             Values values = new Values();
 
             //AGGIUNGO ID MESSAGGIO
-            values.add(ID);
+            values.add(id);
 
             if (!data[5].isEmpty()) {
                 //Aggiungo la Reason
@@ -135,7 +126,8 @@ public class ParseCSV extends BaseRichBolt {
 
 
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields(F_MSGID, REASON, OCCURRED_ON, BORO, BUS_COMPANY_NAME, HOW_LONG_DELAYED, OCCURRED_ON_MILLIS, DAY_IN_MONTH));
+        outputFieldsDeclarer.declare(new Fields(F_MSGID, REASON, OCCURRED_ON, BORO, BUS_COMPANY_NAME, HOW_LONG_DELAYED,
+                OCCURREDON_MILLIS, DAY_IN_MONTH));
     }
 
     public static Reason mappingReason(String reason) {

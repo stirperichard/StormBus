@@ -23,14 +23,6 @@ import java.util.Map;
 public class DataGeneratorQ1 extends BaseRichSpout {
     private static final Logger LOG = LoggerFactory.getLogger(DataGeneratorQ1.class);
 
-    public static final String REASON           	= "reason";
-    public static final String OCCURRED_ON 	        = "occurredOn";
-    public static final String BORO 	            = "boro";
-    public static final String DATA                 = "data";
-    public static final String ID                   = "id";
-
-    public static final String PROFIT_STREAM_ID = "num";
-    public static final String EMPTY_TAXIS_STREAM_ID = "den";
     boolean _feof;
     private SpoutOutputCollector collector;
     private final String dataPath;
@@ -50,7 +42,7 @@ public class DataGeneratorQ1 extends BaseRichSpout {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields(ID, DATA, OCCURRED_ON));
+        outputFieldsDeclarer.declare(new Fields(Constants.ID, Constants.DATA, Constants.OCCURRED_ON));
     }
 
     @Override
@@ -116,7 +108,6 @@ public class DataGeneratorQ1 extends BaseRichSpout {
                     // to this one
                     long fromTupleToSystemTime = Constants.TIME_UNIT_IN_SECONDS * Constants.SECONDS_PER_TIME_UNIT;
                     long sleepTime = (occurredOnMillis - lastTs) /  fromTupleToSystemTime;
-                    //System.out.println("Sleep for: \u001B[31m" + sleepTime + "\u001B[0m");
                     Utils.sleep(sleepTime/10);
                 }
                 lastTs = occurredOnMillis;

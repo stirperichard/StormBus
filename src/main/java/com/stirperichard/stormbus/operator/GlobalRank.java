@@ -11,6 +11,8 @@ import org.apache.storm.tuple.Tuple;
 import java.util.List;
 import java.util.Map;
 
+import static com.stirperichard.stormbus.utils.Constants.*;
+
 public class GlobalRank extends BaseRichBolt {
 
     public static final String OUT = "output";
@@ -39,11 +41,11 @@ public class GlobalRank extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
-        String type 			    = input.getStringByField(PartialRankQ2.TYPE);
-        String occurredOn 		    = input.getStringByField(PartialRankQ2.OCCURRED_ON);
-        long basetime           	= input.getLongByField(PartialRankQ2.OCCURRED_ON_MILLIS_BASETIME);
-        Ranking ranking 	        = (Ranking) input.getValueByField(PartialRankQ2.TOPK);
-        String mOA                  = input.getStringByField(PartialRankQ2.MORNING_OR_AFTERNOON);
+        String type 			    = input.getStringByField(TYPE);
+        String occurredOn 		    = input.getStringByField(OCCURRED_ON);
+        long basetime           	= input.getLongByField(OCCURRED_ON_MILLIS_BASETIME);
+        Ranking ranking 	        = (Ranking) input.getValueByField(TOPK);
+        String mOA                  = input.getStringByField(MORNING_OR_AFTERNOON);
 
         boolean updated = false;
         for (RankItem item : ranking.getRanking()) {

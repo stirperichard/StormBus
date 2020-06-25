@@ -1,7 +1,6 @@
 package com.stirperichard.stormbus.operator;
 
 import com.google.gson.Gson;
-import com.stirperichard.stormbus.utils.Constants;
 import com.stirperichard.stormbus.utils.LinesBatch;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -13,6 +12,9 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.util.Map;
+
+import static com.stirperichard.stormbus.utils.Constants.REDIS_CONSUMED;
+import static com.stirperichard.stormbus.utils.Constants.REDIS_DATA;
 
 
 public class RedisSpout extends BaseRichSpout {
@@ -51,7 +53,7 @@ public class RedisSpout extends BaseRichSpout {
 
 		try {
 			
-			String data = jedis.get(Constants.REDIS_DATA);
+			String data = jedis.get(REDIS_DATA);
 			
 			while (data == null){
 			
@@ -59,12 +61,12 @@ public class RedisSpout extends BaseRichSpout {
 					Thread.sleep(SHORT_SLEEP);
 				} catch (InterruptedException e) { }
 
-				data = jedis.get(Constants.REDIS_DATA);
+				data = jedis.get(REDIS_DATA);
 			
 			}
 
 			/* Remove file from Redis */
-			jedis.del(Constants.REDIS_DATA);
+			jedis.del(REDIS_DATA);
 
 			/* Send data */
 			LinesBatch linesBatch = gson.fromJson(data, LinesBatch.class);
@@ -80,7 +82,7 @@ public class RedisSpout extends BaseRichSpout {
 				this._collector.emit(values, msgId);
 			}
 				
-			jedis.set(Constants.REDIS_CONSUMED, "true");
+			jedis.set(REDIS_CONSUMED, "true");
 
 
 		} catch (JedisConnectionException e) {

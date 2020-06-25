@@ -20,18 +20,6 @@ import static com.stirperichard.stormbus.utils.Constants.*;
 
 public class CountByWindowQuery1 extends BaseRichBolt {
 
-    public static final String F_MSGID              = "msgId";
-    public static final String TIMESTAMP            = "timestamp";  //OccurredOn in millis
-    public static final String OCCURRED_ON          = "occurredOn";
-    public static final String BORO                 = "boro";
-    public static final String F_TIMESTAMP          = "timestamp_real";
-    public static final String AVG_DELAY            = "avg_delay";
-    public static final String DAY                  = "day";
-    public static final String WEEK                 = "week";
-    public static final String MONTH                = "month";
-    public static final String TYPE                 = "type";
-
-    private static final long serialVersionUID      = 1L;
     private OutputCollector collector;
 
     private long latestCompletedTimeframeHour, latestCompletedTimeframeDay, latestCompletedTimeframeWeek, latestCompletedTimeframeMonth;
@@ -40,7 +28,6 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
     public static int ID_from_metronome = 0;
     public static int ID_from_parse = 0;
-
 
     /*
      * QUERY 1 :
@@ -72,7 +59,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
-        if (input.getSourceStreamId().equals(Metronome.S_METRONOME)) {
+        if (input.getSourceStreamId().equals(S_METRONOME)) {
 
             handleMetronomeMessage(input);
 
@@ -86,17 +73,17 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
         String msgType = tuple.getSourceStreamId();
 
-        if (msgType.equals(Metronome.S_METRONOME)) {
-            Long time = tuple.getLongByField(Metronome.OCCURREDON_MILLIS);
-            String occurredOn = tuple.getStringByField(Metronome.OCCURRED_ON);
-            int dayPerMonth = tuple.getIntegerByField(Metronome.DAY_IN_MONTH);
-            String typeMetronome = tuple.getStringByField(Metronome.TYPE_OF_METRONOME);
-            int metronomeID = tuple.getIntegerByField(Metronome.METRONOME_ID);
+        if (msgType.equals(S_METRONOME)) {
+            Long time = tuple.getLongByField(OCCURREDON_MILLIS);
+            String occurredOn = tuple.getStringByField(OCCURRED_ON);
+            int dayPerMonth = tuple.getIntegerByField(DAY_IN_MONTH);
+            String typeMetronome = tuple.getStringByField(TYPE_OF_METRONOME);
+            int metronomeID = tuple.getIntegerByField(METRONOME_ID);
 
             if (metronomeID > ID_from_metronome) {
                 ID_from_metronome = metronomeID;
 
-                if (typeMetronome.equals(Metronome.METRONOME_D)) {
+                if (typeMetronome.equals(METRONOME_D)) {
                     System.out.println("\u001B[33m" + "RICEVUTO METRONOMO DAY" + " WITH ID: " + metronomeID + "\u001B[0m");
                     long latestTimeframe = TimeUtils.roundToCompletedDay(time);
 
@@ -136,7 +123,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     }
                 }
 
-                if (typeMetronome.equals(Metronome.METRONOME_W)) {
+                if (typeMetronome.equals(METRONOME_W)) {
 
                     System.out.println("\u001B[33m" + "RICEVUTO METRONOMO WEEK" + " WITH ID: " + metronomeID + "\u001B[0m");
                     long latestTimeframe = TimeUtils.lastWeek(time);
@@ -177,7 +164,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     }
                 }
 
-                if (typeMetronome.equals(Metronome.METRONOME_M)) {
+                if (typeMetronome.equals(METRONOME_M)) {
 
                     System.out.println("\u001B[33m" + "RICEVUTO METRONOMO MONTH" + " WITH ID: " + metronomeID + "\u001B[0m");
 
@@ -221,19 +208,18 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                 }
             }
         }
-
         collector.ack(tuple);
 
     }
 
     private void handleBusData(Tuple tuple) {
 
-        String boro = tuple.getStringByField(ParseCSV.BORO);
-        String occurredOn = tuple.getStringByField(ParseCSV.OCCURRED_ON);
-        int howLongDelayed = tuple.getIntegerByField(ParseCSV.HOW_LONG_DELAYED);
-        long time = tuple.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
-        int dayPerMonth = tuple.getIntegerByField(ParseCSV.DAY_IN_MONTH);
-        int msgID = tuple.getIntegerByField(ParseCSV.F_MSGID);
+        String boro = tuple.getStringByField(BORO);
+        String occurredOn = tuple.getStringByField(OCCURRED_ON);
+        int howLongDelayed = tuple.getIntegerByField(HOW_LONG_DELAYED);
+        long time = tuple.getLongByField(OCCURREDON_MILLIS);
+        int dayPerMonth = tuple.getIntegerByField(DAY_IN_MONTH);
+        int msgID = tuple.getIntegerByField(F_MSGID);
 
         if (boro.isEmpty()) {
             collector.ack(tuple);
@@ -400,6 +386,6 @@ public class CountByWindowQuery1 extends BaseRichBolt {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
 
-        outputFieldsDeclarer.declare(new Fields(TYPE, F_MSGID, OCCURRED_ON, AVG_DELAY, TIMESTAMP, F_TIMESTAMP));
+        outputFieldsDeclarer.declare(new Fields(TYPE, F_MSGID, OCCURRED_ON, AVG_DELAY, OCCURREDON_MILLIS, F_TIMESTAMP));
     }
 }

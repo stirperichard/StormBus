@@ -13,18 +13,10 @@ import org.apache.storm.tuple.Values;
 
 import java.util.Map;
 
+import static com.stirperichard.stormbus.utils.Constants.*;
+
 public class PartialRankQ2 extends BaseRichBolt {
 
-    public static final String OCCURRED_ON                  = "occurredOn";
-    public static final String OCCURRED_ON_MILLIS_BASETIME  = "OccurredOnMillisBasetime";
-    public static final String REASON                       = "reason";
-    public static final String TYPE                         = "type";
-    public static final String TOTAL                        = "total";
-    public static final String TOPK                         = "topK";
-    public static final String MORNING_OR_AFTERNOON         = "morningOrAfternoon";
-
-    private static final int	NULL = -1;
-    private static final long serialVersionUID = 1L;
     private OutputCollector collector;
     private TopKRanking ranking;
     private int topK;
@@ -42,12 +34,12 @@ public class PartialRankQ2 extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
-        String type 			    = input.getStringByField(CountByWindowQuery2.TYPE);
-        String morningOrAfternoon   = input.getStringByField(CountByWindowQuery2.MORNING_OR_AFTERNOON);
-        String occurredOn   	    = input.getStringByField(CountByWindowQuery2.OCCURRED_ON);
-        String reason       	    = input.getStringByField(CountByWindowQuery2.REASON);
-        int total			        = input.getIntegerByField(CountByWindowQuery2.TOTAL);
-        long occurredOnMillis	    = input.getLongByField(CountByWindowQuery2.OCCURRED_ON_MILLIS_BASETIME);
+        String type 			    = input.getStringByField(TYPE);
+        String morningOrAfternoon   = input.getStringByField(MORNING_OR_AFTERNOON);
+        String occurredOn   	    = input.getStringByField(OCCURRED_ON);
+        String reason       	    = input.getStringByField(REASON);
+        int total			        = input.getIntegerByField(TOTAL);
+        long occurredOnMillis	    = input.getLongByField(OCCURRED_ON_MILLIS_BASETIME);
 
         RankItem item = new RankItem(reason, total, occurredOnMillis);
         boolean updated = ranking.update(item);

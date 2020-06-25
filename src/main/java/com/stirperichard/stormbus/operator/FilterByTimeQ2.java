@@ -13,21 +13,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 
+import static com.stirperichard.stormbus.utils.Constants.*;
+
 public class FilterByTimeQ2 extends BaseRichBolt {
 
-    public static final String F_MSGID				= "MSGID";
-    public static final String OCCURRED_ON       	= "occurredOn";
-    public static final String BORO 	            = "boro";
-    public static final String REASON           	= "reason";
-    public static final String F_TIMESTAMP 	        = "timestamp";
-    public static final String OCCURRED_ON_MILLIS   = "occurred_on_millis";
-    public static final String DAY_IN_MONTH         = "day_in_month";
-    public static final String MORNING              = "morning";
-    public static final String AFTERNOON            = "afternoon";
-    public static final String TYPE                 = "type";
-
-
-    private static final long serialVersionUID = 1L;
     private OutputCollector collector;
     private SimpleDateFormat sdf;
 
@@ -45,10 +34,10 @@ public class FilterByTimeQ2 extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
-        int msgId 			    = tuple.getIntegerByField(ParseCSV.F_MSGID);
-        String occurredOn   	= tuple.getStringByField(ParseCSV.OCCURRED_ON);
-        String reason           = tuple.getStringByField(ParseCSV.REASON);
-        long occurredOnMillis	= tuple.getLongByField(ParseCSV.OCCURRED_ON_MILLIS);
+        int msgId 			    = tuple.getIntegerByField(F_MSGID);
+        String occurredOn   	= tuple.getStringByField(OCCURRED_ON);
+        String reason           = tuple.getStringByField(REASON);
+        long occurredOnMillis	= tuple.getLongByField(OCCURREDON_MILLIS);
 
         if(filterIDMsg < msgId) {
 
@@ -84,7 +73,7 @@ public class FilterByTimeQ2 extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields(F_MSGID, OCCURRED_ON, REASON, OCCURRED_ON_MILLIS, TYPE));
+        outputFieldsDeclarer.declare(new Fields(F_MSGID, OCCURRED_ON, REASON, OCCURREDON_MILLIS, TYPE));
 
     }
 }

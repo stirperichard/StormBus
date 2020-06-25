@@ -6,6 +6,10 @@ import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.tuple.Fields;
+
+import static com.stirperichard.stormbus.utils.Constants.MORNING_OR_AFTERNOON;
+import static com.stirperichard.stormbus.utils.Constants.S_METRONOME;
 
 public class Query2 {
 
@@ -55,15 +59,15 @@ public class Query2 {
         builder.setBolt("countByWindow2", new CountByWindowQuery2())
                 .setNumTasks(numTasks)
                 .allGrouping("filterbytime")
-                .allGrouping("metronome", Metronome.S_METRONOME);
+                .allGrouping("metronome", S_METRONOME);
 
 		/* Two operators that realize the top-10 ranking in two steps (typical design pattern):
         PartialRank can be distributed and parallelized,
         whereas TotalRank is centralized and computes the global ranking */
-/*
+
         builder.setBolt("partialRank", new PartialRankQ2(3))
                 .setNumTasks(numTasks)
-                .fieldsGrouping("countByWindow2", new Fields(CountByWindowQuery2.TYPE));
+                .fieldsGrouping("countByWindow2", new Fields(MORNING_OR_AFTERNOON));
 
         builder.setBolt("globalRank", new GlobalRank(3))
                 .setNumTasks(numTasksGlobalRank)
