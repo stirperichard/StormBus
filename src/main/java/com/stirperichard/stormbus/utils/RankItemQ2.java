@@ -2,7 +2,7 @@ package com.stirperichard.stormbus.utils;
 
 import java.io.Serializable;
 
-public class RankItem implements Serializable{
+public class RankItemQ2 implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 
@@ -10,10 +10,10 @@ public class RankItem implements Serializable{
 	private int frequency;
 	private long basetime;
 	
-	public RankItem() {
+	public RankItemQ2() {
 	}
 	
-	public RankItem(String reason, int frequency, long basetime) {
+	public RankItemQ2(String reason, int frequency, long basetime) {
 		super();
 		this.reason = reason;
 		this.frequency = frequency;
@@ -47,10 +47,10 @@ public class RankItem implements Serializable{
 	@Override
 	public boolean equals(Object obj) {
 	
-		if (obj == null || !(obj instanceof com.stirperichard.stormbus.utils.RankItem))
+		if (obj == null || !(obj instanceof RankItemQ2))
 			return false;
 
-		com.stirperichard.stormbus.utils.RankItem other = (com.stirperichard.stormbus.utils.RankItem) obj;
+		RankItemQ2 other = (RankItemQ2) obj;
 		
 		if (this.reason.equals(other.reason))
 			return true;

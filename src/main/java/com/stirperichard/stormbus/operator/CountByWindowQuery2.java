@@ -23,8 +23,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
     private OutputCollector collector;
 
-    private long latestCompletedTimeframeDay, latestCompletedTimeframeWeek,
-            latestCompletedTimeframeDayMorning, latestCompletedTimeframeDayAfternoon,
+    private long latestCompletedTimeframeDayMorning, latestCompletedTimeframeDayAfternoon,
             latestCompletedTimeframeWeekMorning, latestCompletedTimeframeWeekAfternoon;
 
     private SimpleDateFormat sdf;
@@ -51,8 +50,6 @@ public class CountByWindowQuery2 extends BaseRichBolt {
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.collector = outputCollector;
-        this.latestCompletedTimeframeDay = 0;
-        this.latestCompletedTimeframeWeek = 0;
         this.map_day_afternoon = new HashMap<String, Window>();
         this.map_day_morning = new HashMap<String, Window>();
         this.map_week_morning = new HashMap<String, Window>();
@@ -89,9 +86,9 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                     System.out.println("\u001B[33m" + "RICEVUTO METRONOMO DAY" + " WITH ID: " + metronomeID + "\u001B[0m");
                     long latestTimeframe = TimeUtils.roundToCompletedDay(time);
 
-                    if (this.latestCompletedTimeframeDayMorning < latestTimeframe && this.latestCompletedTimeframeDayAfternoon < latestTimeframe) {
+                    if (this.latestCompletedTimeframeDayMorning < latestTimeframe || this.latestCompletedTimeframeWeekMorning < latestTimeframe) {
 
-                        int elapsedDay = (int) Math.ceil((latestTimeframe - this.latestCompletedTimeframeDay) / (MILLIS_HOUR * 24));
+                        int elapsedDay = (int) Math.ceil((latestTimeframe - this.latestCompletedTimeframeDayMorning) / (MILLIS_DAY));
                         List<String> expiredReasons = new ArrayList<>();
 
                         for (String r : map_day_morning.keySet()) {
@@ -138,7 +135,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                             map_day_afternoon.remove(r);
                         }
 
-                        this.latestCompletedTimeframeDay = latestTimeframe;
+                        this.latestCompletedTimeframeDayMorning = latestTimeframe;
+                        this.latestCompletedTimeframeDayAfternoon = latestTimeframe;
                     }
                 }
 
@@ -147,9 +145,9 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                     System.out.println("\u001B[33m" + "RICEVUTO METRONOMO WEEK" + " WITH ID: " + metronomeID + "\u001B[0m");
                     long latestTimeframe = TimeUtils.lastWeek(time);
 
-                    if (this.latestCompletedTimeframeWeek < latestTimeframe) {
+                    if (this.latestCompletedTimeframeWeekMorning < latestTimeframe) {
 
-                        int elapsedWeek = (int) Math.ceil((latestTimeframe - this.latestCompletedTimeframeWeek) / (MILLIS_HOUR * 24 * 7));
+                        int elapsedWeek = (int) Math.ceil((latestTimeframe - this.latestCompletedTimeframeWeekMorning) / (MILLIS_HOUR * 24 * 7));
                         List<String> expiredReasons = new ArrayList<>();
 
                         for (String r : map_week_morning.keySet()) {
@@ -196,7 +194,8 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                             map_week_afternoon.remove(r);
                         }
 
-                        this.latestCompletedTimeframeWeek = latestTimeframe;
+                        this.latestCompletedTimeframeWeekMorning = latestTimeframe;
+                        this.latestCompletedTimeframeWeekAfternoon = latestTimeframe;
                     }
                 }
             }
@@ -212,8 +211,6 @@ public class CountByWindowQuery2 extends BaseRichBolt {
         int msgID = tuple.getIntegerByField(F_MSGID);
         String reason = tuple.getStringByField(REASON);
         String type = tuple.getStringByField(TYPE);
-
-
 
         if (this.latestCompletedTimeframeWeekMorning == 0)
             this.latestCompletedTimeframeWeekMorning = TimeUtils.lastWeek(time);
@@ -266,7 +263,6 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                     }
 
                     this.latestCompletedTimeframeDayMorning = latestTimeframeDay;
-
                 }
 
                 Window wDM = map_day_morning.get(reason);

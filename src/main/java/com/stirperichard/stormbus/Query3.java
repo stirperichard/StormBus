@@ -1,16 +1,18 @@
 package com.stirperichard.stormbus;
 
-import com.stirperichard.stormbus.operator.*;
+import com.stirperichard.stormbus.operator.ComputeScoreByWindow;
+import com.stirperichard.stormbus.operator.DataGenerator;
+import com.stirperichard.stormbus.operator.FilterReason;
+import com.stirperichard.stormbus.operator.MetronomeQuery3;
 import com.stirperichard.stormbus.utils.TConf;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.topology.base.BaseWindowedBolt;
 import org.apache.storm.tuple.Fields;
 
-import java.util.concurrent.TimeUnit;
+import static com.stirperichard.stormbus.utils.Constants.S_METRONOME;
 
 public class Query3 {
 
@@ -68,7 +70,7 @@ public class Query3 {
         builder.setBolt("computeScore", new ComputeScoreByWindow())
                 .setNumTasks(numTasks)
                 .fieldsGrouping("filterReason", new Fields(DataGenerator.BUS_COMPANY_NAME))
-                .allGrouping("metronome", Metronome.S_METRONOME);
+                .allGrouping("metronome", S_METRONOME);
 
 
         /*

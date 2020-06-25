@@ -7,17 +7,17 @@ public class Ranking implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	List<com.stirperichard.stormbus.utils.RankItem> ranking;
+	List<RankItemQ2> ranking;
 	
 	public Ranking() {
 	
 	}
 
-	public List<com.stirperichard.stormbus.utils.RankItem> getRanking() {
+	public List<RankItemQ2> getRanking() {
 		return ranking;
 	}
 
-	public void setRanking(List<com.stirperichard.stormbus.utils.RankItem> ranking) {
+	public void setRanking(List<RankItemQ2> ranking) {
 		this.ranking = ranking;
 	}
 	

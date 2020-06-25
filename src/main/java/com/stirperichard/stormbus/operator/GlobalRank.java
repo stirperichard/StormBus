@@ -15,8 +15,6 @@ import static com.stirperichard.stormbus.utils.Constants.*;
 
 public class GlobalRank extends BaseRichBolt {
 
-    public static final String OUT = "output";
-
     private RabbitMQManager rabbitmq;
 
     private boolean USE_RABBIT;
@@ -27,7 +25,6 @@ public class GlobalRank extends BaseRichBolt {
     private OutputCollector collector;
     private TopKRanking topKranking;
     private int k;
-
 
     public GlobalRank(int k) {
         this.k = k;
@@ -48,19 +45,23 @@ public class GlobalRank extends BaseRichBolt {
         String mOA                  = input.getStringByField(MORNING_OR_AFTERNOON);
 
         boolean updated = false;
-        for (RankItem item : ranking.getRanking()) {
+        for (RankItemQ2 item : ranking.getRanking()) {
+            System.out.println("\u001B[33m" + item.toString() + "\u001B[0m");
             updated |= topKranking.update(item);
         }
 
         String output = "";
-        /* Emit if the local top10 is changed */
+        /* Emit if the local top3 is changed */
         if (updated) {
 
-            List<RankItem> globalTopK = topKranking.getTopK().getRanking();
+            List<RankItemQ2> globalTopK = topKranking.getTopK().getRanking();
+
+            System.out.println("\u001B[33m" + TimeUtils.retriveDataFromMillis(basetime) + " - " + type + " - " + mOA + "\u001B[0m");
 
             for (int i = 0; i < globalTopK.size(); i++) {
-                RankItem item = globalTopK.get(i);
+                RankItemQ2 item = globalTopK.get(i);
                 output += item.getReason();
+                System.out.println("\u001B[33m" + item.toString() + "\u001B[0m");
                 output += ", ";
             }
 
@@ -73,7 +74,6 @@ public class GlobalRank extends BaseRichBolt {
             }
 
         }
-
         collector.ack(input);
 
         System.out.println("GLOBAL RANK: " + " DAY/WEEK: " + type + " MORNING/AFTERNOON: " + mOA + " BASETIME: " + TimeUtils.retriveDataFromMillis(basetime) + " OUTPUT: " + output);

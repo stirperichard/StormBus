@@ -1,6 +1,6 @@
 package com.stirperichard.stormbus.operator;
 
-import com.stirperichard.stormbus.utils.RankItem;
+import com.stirperichard.stormbus.utils.RankItemQ2;
 import com.stirperichard.stormbus.utils.Ranking;
 import com.stirperichard.stormbus.utils.TopKRanking;
 import org.apache.storm.task.OutputCollector;
@@ -41,7 +41,7 @@ public class PartialRankQ2 extends BaseRichBolt {
         int total			        = input.getIntegerByField(TOTAL);
         long occurredOnMillis	    = input.getLongByField(OCCURRED_ON_MILLIS_BASETIME);
 
-        RankItem item = new RankItem(reason, total, occurredOnMillis);
+        RankItemQ2 item = new RankItemQ2(reason, total, occurredOnMillis);
         boolean updated = ranking.update(item);
 
         /* Emit if the local top10 is changed */

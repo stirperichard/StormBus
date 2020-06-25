@@ -7,15 +7,15 @@ import java.util.List;
 
 public class TopKRanking {
 
-	private Comparator<RankItem> comparator = null;
-	private List<RankItem> ranking = null;
+	private Comparator<RankItemQ2> comparator = null;
+	private List<RankItemQ2> ranking = null;
 	private int topK = 10;
 
 	private static final int NOT_PRESENT = -1;
 
 	public TopKRanking(int k) {
 		this.comparator = new RankItemComparator();
-		this.ranking = new ArrayList<RankItem>();
+		this.ranking = new ArrayList<RankItemQ2>();
 		this.topK = k;
 	}
 
@@ -27,7 +27,7 @@ public class TopKRanking {
 	 * @param item
 	 * @return
 	 */
-	public boolean update(RankItem item) {
+	public boolean update(RankItemQ2 item) {
 
 		int sizePreUpdate = ranking.size();
 		int oldPosition = findIndex(item);
@@ -56,7 +56,7 @@ public class TopKRanking {
 
 	}
 
-	public int add(RankItem item) {
+	public int add(RankItemQ2 item) {
 
 		int insertionPoint = Collections.binarySearch(ranking, item, comparator);
 		ranking.add((insertionPoint > -1) ? insertionPoint : (-insertionPoint) - 1, item);
@@ -65,13 +65,13 @@ public class TopKRanking {
 
 	}
 	
-	public void remove(RankItem item){
+	public void remove(RankItemQ2 item){
 		
 		ranking.remove(item);
 		
 	}
 
-	private int findIndex(RankItem item) {
+	private int findIndex(RankItemQ2 item) {
 
 		for (int i = 0; i < ranking.size(); i++) {
 			if (item.equals(ranking.get(i)))
@@ -82,7 +82,7 @@ public class TopKRanking {
 
 	}
 
-	public boolean containsElement(RankItem item) {
+	public boolean containsElement(RankItemQ2 item) {
 
 		return (findIndex(item) != NOT_PRESENT);
 	
@@ -90,7 +90,7 @@ public class TopKRanking {
 	
 	public Ranking getTopK(){
 		
-		List<RankItem> top = new ArrayList<RankItem>();
+		List<RankItemQ2> top = new ArrayList<RankItemQ2>();
 		
 		if (ranking.isEmpty()){
 			Ranking topKRanking = new Ranking();

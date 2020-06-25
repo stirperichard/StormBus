@@ -12,6 +12,8 @@ import org.apache.storm.tuple.Values;
 
 import java.util.*;
 
+import static com.stirperichard.stormbus.utils.Constants.S_METRONOME;
+
 public class ComputeScoreByWindow extends BaseRichBolt {
 
 
@@ -49,7 +51,7 @@ public class ComputeScoreByWindow extends BaseRichBolt {
 	@Override
 	public void execute(Tuple tuple) {
 
-		if (tuple.getSourceStreamId().equals(Metronome.S_METRONOME)) {
+		if (tuple.getSourceStreamId().equals(S_METRONOME)) {
 			handleMetronomeMessage(tuple);  //sliding window based on event time
 		} else {
 			handleTaxiReport(tuple);

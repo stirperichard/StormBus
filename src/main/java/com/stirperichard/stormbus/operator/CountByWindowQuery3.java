@@ -11,6 +11,8 @@ import org.apache.storm.tuple.Values;
 
 import java.util.*;
 
+import static com.stirperichard.stormbus.utils.Constants.*;
+
 public class CountByWindowQuery3 extends BaseRichBolt {
 
 	public static final String S_PULSE 				= "sPulse";
@@ -59,7 +61,7 @@ public class CountByWindowQuery3 extends BaseRichBolt {
     @Override
 	public void execute(Tuple tuple) {
     	
-    	if (tuple.getSourceStreamId().equals(Metronome.S_METRONOME)){
+    	if (tuple.getSourceStreamId().equals(S_METRONOME)){
     		handleMetronomeMessage(tuple);  //sliding window based on event time
     	} else {
     		handleTaxiReport(tuple);
@@ -69,11 +71,11 @@ public class CountByWindowQuery3 extends BaseRichBolt {
     
     private void handleMetronomeMessage(Tuple tuple){
     
-		String msgId 			= tuple.getStringByField(Metronome.F_MSGID);
-		String reason 			= tuple.getStringByField(DataGenerator.REASON);
+		String msgId 			= tuple.getStringByField(F_MSGID);
+		String reason 			= tuple.getStringByField(REASON);
 		String time		 		= tuple.getStringByField(MetronomeQuery3.F_TIME);
-		String busCompanyName 	= tuple.getStringByField(DataGenerator.BUS_COMPANY_NAME);
-		String howLongDelayed 	= tuple.getStringByField(DataGenerator.HOW_LONG_DELAYED);
+		String busCompanyName 	= tuple.getStringByField(BUS_COMPANY_NAME);
+		String howLongDelayed 	= tuple.getStringByField(HOW_LONG_DELAYED);
 
 		long latestTimeframe = roundToCompletedMinute(time);
 		
@@ -123,12 +125,12 @@ public class CountByWindowQuery3 extends BaseRichBolt {
     
     private void handleTaxiReport(Tuple tuple){
     	
-		String msgId 			= tuple.getStringByField(Metronome.F_MSGID);
-		String reason 			= tuple.getStringByField(DataGenerator.REASON);
+		String msgId 			= tuple.getStringByField(F_MSGID);
+		String reason 			= tuple.getStringByField(REASON);
 		String time		 		= tuple.getStringByField(MetronomeQuery3.F_TIME);
-		String boro				= tuple.getStringByField(DataGenerator.BORO);
-		String busCompanyName 	= tuple.getStringByField(DataGenerator.BUS_COMPANY_NAME);
-		String howLongDelayed 		= tuple.getStringByField(DataGenerator.HOW_LONG_DELAYED);
+		String boro				= tuple.getStringByField(BORO);
+		String busCompanyName 	= tuple.getStringByField(BUS_COMPANY_NAME);
+		String howLongDelayed 		= tuple.getStringByField(HOW_LONG_DELAYED);
 
 		long latestTimeframe = roundToCompletedMinute(time);
 		
