@@ -34,12 +34,13 @@ public class PartialRankQ2 extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
-        String type 			    = input.getStringByField(TYPE);
-        String morningOrAfternoon   = input.getStringByField(MORNING_OR_AFTERNOON);
-        String occurredOn   	    = input.getStringByField(OCCURRED_ON);
-        String reason       	    = input.getStringByField(REASON);
-        int total			        = input.getIntegerByField(TOTAL);
-        long occurredOnMillis	    = input.getLongByField(OCCURRED_ON_MILLIS_BASETIME);
+        String type 			            = input.getStringByField(TYPE);
+        String morningOrAfternoon           = input.getStringByField(MORNING_OR_AFTERNOON);
+        String occurredOn   	            = input.getStringByField(OCCURRED_ON);
+        String reason       	            = input.getStringByField(REASON);
+        int total			                = input.getIntegerByField(TOTAL);
+        long occurredOnMillisBasetime	    = input.getLongByField(OCCURRED_ON_MILLIS_BASETIME);
+        long occurredOnMillis               = input.getLongByField(OCCURREDON_MILLIS);
 
         RankItemQ2 item = new RankItemQ2(reason, total, occurredOnMillis);
         boolean updated = ranking.update(item);
@@ -48,7 +49,7 @@ public class PartialRankQ2 extends BaseRichBolt {
         if (updated){
             Ranking topK = ranking.getTopK();
 
-            Values values = new Values(type, morningOrAfternoon, occurredOn, occurredOnMillis, topK);
+            Values values = new Values(type, morningOrAfternoon, occurredOn, occurredOnMillisBasetime, topK);
 
             collector.emit(values);
 

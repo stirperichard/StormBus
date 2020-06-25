@@ -78,6 +78,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
             String occurredOn = tuple.getStringByField(OCCURRED_ON);
             String typeMetronome = tuple.getStringByField(TYPE_OF_METRONOME);
             int metronomeID = tuple.getIntegerByField(METRONOME_ID);
+            long occurredOnMillis = tuple.getLongByField(OCCURREDON_MILLIS);
 
             if (metronomeID > ID_from_metronomeQ2) {
                 ID_from_metronomeQ2 = metronomeID;
@@ -105,7 +106,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                             /* Reduce memory by removing windows with no data */
                             expiredReasons.add(r);
 
-                            Values v = new Values(DAY, MORNING, occurredOn, r, numberOfDelays, latestTimeframe);
+                            Values v = new Values(DAY, MORNING, occurredOn, occurredOnMillis, r, numberOfDelays, latestTimeframe);
 
                             collector.emit(v);
                         }
@@ -124,7 +125,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                             /* Reduce memory by removing windows with no data */
                             expiredReasons.add(r);
 
-                            Values v = new Values(DAY, AFTERNOON, occurredOn, r, numberOfDelays, latestTimeframe);
+                            Values v = new Values(DAY, AFTERNOON, occurredOn, occurredOnMillis, r, numberOfDelays, latestTimeframe);
 
                             collector.emit(v);
                         }
@@ -164,7 +165,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                             /* Reduce memory by removing windows with no data */
                             expiredReasons.add(r);
 
-                            Values v = new Values(WEEK, MORNING, occurredOn, r, numberOfDelays, latestTimeframe);
+                            Values v = new Values(WEEK, MORNING, occurredOn, occurredOnMillis, r, numberOfDelays, latestTimeframe);
 
                             collector.emit(v);
                         }
@@ -183,7 +184,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                             /* Reduce memory by removing windows with no data */
                             expiredReasons.add(r);
 
-                            Values v = new Values(WEEK, AFTERNOON, occurredOn, r, numberOfDelays, latestTimeframe);
+                            Values v = new Values(WEEK, AFTERNOON, occurredOn, occurredOnMillis, r, numberOfDelays, latestTimeframe);
 
                             collector.emit(v);
                         }
@@ -206,28 +207,28 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
     private void handleBusData(Tuple tuple) {
 
-        String occurredOn = tuple.getStringByField(OCCURRED_ON);
-        long time = tuple.getLongByField(OCCURREDON_MILLIS);
-        int msgID = tuple.getIntegerByField(F_MSGID);
-        String reason = tuple.getStringByField(REASON);
-        String type = tuple.getStringByField(TYPE);
+        String occurredOn           = tuple.getStringByField(OCCURRED_ON);
+        long occurredOnMillis       = tuple.getLongByField(OCCURREDON_MILLIS);
+        int msgID                   = tuple.getIntegerByField(F_MSGID);
+        String reason               = tuple.getStringByField(REASON);
+        String type                 = tuple.getStringByField(TYPE);
 
         if (this.latestCompletedTimeframeWeekMorning == 0)
-            this.latestCompletedTimeframeWeekMorning = TimeUtils.lastWeek(time);
+            this.latestCompletedTimeframeWeekMorning = TimeUtils.lastWeek(occurredOnMillis);
         if (this.latestCompletedTimeframeWeekAfternoon == 0)
-            this.latestCompletedTimeframeWeekAfternoon = TimeUtils.lastWeek(time);
+            this.latestCompletedTimeframeWeekAfternoon = TimeUtils.lastWeek(occurredOnMillis);
 
         if (this.latestCompletedTimeframeDayMorning == 0)
-            this.latestCompletedTimeframeDayMorning = TimeUtils.roundToCompletedDay(time);
+            this.latestCompletedTimeframeDayMorning = TimeUtils.roundToCompletedDay(occurredOnMillis);
         if (this.latestCompletedTimeframeDayAfternoon == 0)
-            this.latestCompletedTimeframeDayAfternoon = TimeUtils.roundToCompletedDay(time);
+            this.latestCompletedTimeframeDayAfternoon = TimeUtils.roundToCompletedDay(occurredOnMillis);
 
 
         if (msgID > ID_from_parseQ2) {
 
             ID_from_parseQ2 = msgID;
-            long latestTimeframeDay = TimeUtils.roundToCompletedDay(time);
-            long latestTimeframeWeek = TimeUtils.lastWeek(time);
+            long latestTimeframeDay = TimeUtils.roundToCompletedDay(occurredOnMillis);
+            long latestTimeframeWeek = TimeUtils.lastWeek(occurredOnMillis);
 
             if (type.equals(MORNING)) {
 
@@ -252,7 +253,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                         // Reduce memory by removing windows with no data
                         expiredReasons.add(r);
 
-                        Values v = new Values(DAY, MORNING, occurredOn, r, numberOfDelays, latestCompletedTimeframeDayMorning);
+                        Values v = new Values(DAY, MORNING, occurredOn, occurredOnMillis, r, numberOfDelays, latestCompletedTimeframeDayMorning);
 
                         collector.emit(v);
                     }
@@ -292,7 +293,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                         //Reduce memory by removing windows with no data
                         expiredReasons.add(r);
 
-                        Values v = new Values(WEEK, MORNING, occurredOn, r, numberOfDelays, latestCompletedTimeframeWeekMorning);
+                        Values v = new Values(WEEK, MORNING, occurredOn, occurredOnMillis, r, numberOfDelays, latestCompletedTimeframeWeekMorning);
 
                         collector.emit(v);
                     }
@@ -335,7 +336,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                         // Reduce memory by removing windows with no data
                         expiredReasons.add(r);
 
-                        Values v = new Values(DAY, AFTERNOON, occurredOn, r, numberOfDelays, latestCompletedTimeframeDayAfternoon);
+                        Values v = new Values(DAY, AFTERNOON, occurredOn, occurredOnMillis, r, numberOfDelays, latestCompletedTimeframeDayAfternoon);
 
                         collector.emit(v);
                     }
@@ -376,7 +377,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                         // Reduce memory by removing windows with no data
                         expiredReasons.add(r);
 
-                        Values v = new Values(WEEK, AFTERNOON, occurredOn, r, numberOfDelays, latestCompletedTimeframeWeekAfternoon);
+                        Values v = new Values(WEEK, AFTERNOON, occurredOn, occurredOnMillis, r, numberOfDelays, latestCompletedTimeframeWeekAfternoon);
 
                         collector.emit(v);
                     }
@@ -405,7 +406,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
     @Override
     public void declareOutputFields (OutputFieldsDeclarer outputFieldsDeclarer){
-        outputFieldsDeclarer.declare(new Fields(TYPE, MORNING_OR_AFTERNOON, OCCURRED_ON, REASON, TOTAL, OCCURRED_ON_MILLIS_BASETIME));
+        outputFieldsDeclarer.declare(new Fields(TYPE, MORNING_OR_AFTERNOON, OCCURRED_ON, OCCURREDON_MILLIS, REASON, TOTAL, OCCURRED_ON_MILLIS_BASETIME));
     }
 
 }
