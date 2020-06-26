@@ -60,6 +60,6 @@ public class RankItemQ2 implements Serializable{
 	
 	@Override
 	public String toString() {
-		return reason + ":" + String.valueOf(frequency);
+		return reason + ":" + frequency;
 	}
 }

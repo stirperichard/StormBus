@@ -45,23 +45,26 @@ public class GlobalRank extends BaseRichBolt {
         String mOA                  = input.getStringByField(MORNING_OR_AFTERNOON);
 
         boolean updated = false;
+
         for (RankItemQ2 item : ranking.getRanking()) {
-            System.out.println("\u001B[33m" + item.toString() + "\u001B[0m");
             updated |= topKranking.update(item);
+            System.out.println(TimeUtils.retriveDataFromMillis(basetime) + " " + topKranking.toString());
         }
 
         String output = "";
         /* Emit if the local top3 is changed */
         if (updated) {
 
+            //System.out.println(TimeUtils.retriveDataFromMillis(basetime) + " - " + type + " - " + mOA + topKranking.toString());
+
             List<RankItemQ2> globalTopK = topKranking.getTopK().getRanking();
 
-            System.out.println("\u001B[33m" + TimeUtils.retriveDataFromMillis(basetime) + " - " + type + " - " + mOA + "\u001B[0m");
+            //System.out.println("\u001B[33m" + TimeUtils.retriveDataFromMillis(basetime) + " - " + type + " - " + mOA + "\u001B[0m");
 
             for (int i = 0; i < globalTopK.size(); i++) {
                 RankItemQ2 item = globalTopK.get(i);
                 output += item.getReason();
-                System.out.println("\u001B[33m" + item.toString() + "\u001B[0m");
+                //System.out.println("\u001B[33m" + item.toString() + "\u001B[0m");
                 output += ", ";
             }
 

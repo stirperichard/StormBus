@@ -66,7 +66,7 @@ public class Query2 {
 
         builder.setBolt("partialRank", new PartialRankQ2(3))
                 .setNumTasks(numTasks)
-                .fieldsGrouping("countByWindow2", new Fields(MORNING_OR_AFTERNOON, TYPE));
+                .fieldsGrouping("countByWindow2", new Fields(MORNING_OR_AFTERNOON));
 
         builder.setBolt("globalRank", new GlobalRank(3))
                 .setNumTasks(numTasksGlobalRank)
