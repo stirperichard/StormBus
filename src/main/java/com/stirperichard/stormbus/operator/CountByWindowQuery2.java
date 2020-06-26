@@ -61,7 +61,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
     public void execute(Tuple input) {
         if (input.getSourceStreamId().equals(S_METRONOME)) {
 
-            //handleMetronomeMessage(input);  //sliding window based on event time
+            handleMetronomeMessage(input);  //sliding window based on event time
 
         } else {
 
@@ -71,147 +71,144 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
     private void handleMetronomeMessage(Tuple tuple) {
 
-        String msgType = tuple.getSourceStreamId();
+        Long time = tuple.getLongByField(OCCURREDON_MILLIS);
+        String occurredOn = tuple.getStringByField(OCCURRED_ON);
+        String typeMetronome = tuple.getStringByField(TYPE_OF_METRONOME);
+        int metronomeID = tuple.getIntegerByField(METRONOME_ID);
+        long occurredOnMillis = tuple.getLongByField(OCCURREDON_MILLIS);
 
-        if (msgType.equals(S_METRONOME)) {
-            Long time = tuple.getLongByField(OCCURREDON_MILLIS);
-            String occurredOn = tuple.getStringByField(OCCURRED_ON);
-            String typeMetronome = tuple.getStringByField(TYPE_OF_METRONOME);
-            int metronomeID = tuple.getIntegerByField(METRONOME_ID);
-            long occurredOnMillis = tuple.getLongByField(OCCURREDON_MILLIS);
+        if (metronomeID > ID_from_metronomeQ2) {
+            ID_from_metronomeQ2 = metronomeID;
 
-            if (metronomeID > ID_from_metronomeQ2) {
-                ID_from_metronomeQ2 = metronomeID;
+            if (typeMetronome.equals(METRONOME_D)) {
+                System.out.println("\u001B[33m" + "RICEVUTO METRONOMO DAY" + " WITH ID: " + metronomeID + "\u001B[0m");
+                long latestTimeframe = TimeUtils.roundToCompletedDay(time);
 
-                if (typeMetronome.equals(METRONOME_D)) {
-                    System.out.println("\u001B[33m" + "RICEVUTO METRONOMO DAY" + " WITH ID: " + metronomeID + "\u001B[0m");
-                    long latestTimeframe = TimeUtils.roundToCompletedDay(time);
+                if (this.latestCompletedTimeframeDayMorning < latestTimeframe || this.latestCompletedTimeframeDayAfternoon < latestTimeframe) {
 
-                    if (this.latestCompletedTimeframeDayMorning < latestTimeframe || this.latestCompletedTimeframeWeekMorning < latestTimeframe) {
+                    int elapsedDay = (int) Math.ceil((latestTimeframe - this.latestCompletedTimeframeDayMorning) / (MILLIS_DAY));
+                    List<String> expiredReasons = new ArrayList<>();
 
-                        int elapsedDay = (int) Math.ceil((latestTimeframe - this.latestCompletedTimeframeDayMorning) / (MILLIS_DAY));
-                        List<String> expiredReasons = new ArrayList<>();
+                    for (String r : map_day_morning.keySet()) {
 
-                        for (String r : map_day_morning.keySet()) {
-
-                            Window w = map_day_morning.get(r);
-                            if (w == null) {
-                                continue;
-                            }
-
-                            int numberOfDelays = w.getEstimatedTotal();
-
-                            w.moveForward(elapsedDay);
-
-                            /* Reduce memory by removing windows with no data */
-                            expiredReasons.add(r);
-
-                            Values v = new Values(DAY, MORNING, occurredOn, occurredOnMillis, r, numberOfDelays, latestTimeframe);
-
-                            collector.emit(v);
+                        Window w = map_day_morning.get(r);
+                        if (w == null) {
+                            continue;
                         }
 
-                        for (String r : map_day_afternoon.keySet()) {
+                        int numberOfDelays = w.getEstimatedTotal();
 
-                            Window w = map_day_afternoon.get(r);
-                            if (w == null) {
-                                continue;
-                            }
-
-                            int numberOfDelays = w.getEstimatedTotal();
-
-                            w.moveForward(elapsedDay);
-
-                            /* Reduce memory by removing windows with no data */
-                            expiredReasons.add(r);
-
-                            Values v = new Values(DAY, AFTERNOON, occurredOn, occurredOnMillis, r, numberOfDelays, latestTimeframe);
-
-                            collector.emit(v);
-                        }
+                        w.moveForward(elapsedDay);
 
                         /* Reduce memory by removing windows with no data */
-                        for (String r : expiredReasons) {
-                            map_day_morning.remove(r);
-                            map_day_afternoon.remove(r);
+                        expiredReasons.add(r);
+
+                        Values v = new Values(DAY, MORNING, occurredOn, occurredOnMillis, r, numberOfDelays, latestTimeframe);
+
+                        collector.emit(v);
+                    }
+
+                    for (String r : map_day_afternoon.keySet()) {
+
+                        Window w = map_day_afternoon.get(r);
+                        if (w == null) {
+                            continue;
                         }
 
-                        this.latestCompletedTimeframeDayMorning = latestTimeframe;
-                        this.latestCompletedTimeframeDayAfternoon = latestTimeframe;
+                        int numberOfDelays = w.getEstimatedTotal();
+
+                        w.moveForward(elapsedDay);
+
+                        /* Reduce memory by removing windows with no data */
+                        expiredReasons.add(r);
+
+                        Values v = new Values(DAY, AFTERNOON, occurredOn, occurredOnMillis, r, numberOfDelays, latestTimeframe);
+
+                        collector.emit(v);
                     }
+
+                    /* Reduce memory by removing windows with no data */
+                    for (String r : expiredReasons) {
+                        map_day_morning.remove(r);
+                        map_day_afternoon.remove(r);
+                    }
+
+                    this.latestCompletedTimeframeDayMorning = latestTimeframe;
+                    this.latestCompletedTimeframeDayAfternoon = latestTimeframe;
                 }
+            }
 
-                if (typeMetronome.equals(METRONOME_W)) {
+            if (typeMetronome.equals(METRONOME_W)) {
 
-                    System.out.println("\u001B[33m" + "RICEVUTO METRONOMO WEEK" + " WITH ID: " + metronomeID + "\u001B[0m");
-                    long latestTimeframe = TimeUtils.lastWeek(time);
+                System.out.println("\u001B[33m" + "RICEVUTO METRONOMO WEEK" + " WITH ID: " + metronomeID + "\u001B[0m");
+                long latestTimeframe = TimeUtils.lastWeek(time);
 
-                    if (this.latestCompletedTimeframeWeekMorning < latestTimeframe) {
+                if (this.latestCompletedTimeframeWeekMorning < latestTimeframe) {
 
-                        int elapsedWeek = (int) Math.ceil((latestTimeframe - this.latestCompletedTimeframeWeekMorning) / (MILLIS_HOUR * 24 * 7));
-                        List<String> expiredReasons = new ArrayList<>();
+                    int elapsedWeek = (int) Math.ceil((latestTimeframe - this.latestCompletedTimeframeWeekMorning) / (MILLIS_HOUR * 24 * 7));
+                    List<String> expiredReasons = new ArrayList<>();
 
-                        for (String r : map_week_morning.keySet()) {
+                    for (String r : map_week_morning.keySet()) {
 
-                            Window w = map_week_morning.get(r);
-                            if (w == null) {
-                                continue;
-                            }
-
-                            int numberOfDelays = w.getEstimatedTotal();
-
-                            w.moveForward(elapsedWeek);
-
-                            /* Reduce memory by removing windows with no data */
-                            expiredReasons.add(r);
-
-                            Values v = new Values(WEEK, MORNING, occurredOn, occurredOnMillis, r, numberOfDelays, latestTimeframe);
-
-                            collector.emit(v);
+                        Window w = map_week_morning.get(r);
+                        if (w == null) {
+                            continue;
                         }
 
-                        for (String r : map_week_afternoon.keySet()) {
+                        int numberOfDelays = w.getEstimatedTotal();
 
-                            Window w = map_week_afternoon.get(r);
-                            if (w == null) {
-                                continue;
-                            }
-
-                            int numberOfDelays = w.getEstimatedTotal();
-
-                            w.moveForward(elapsedWeek);
-
-                            /* Reduce memory by removing windows with no data */
-                            expiredReasons.add(r);
-
-                            Values v = new Values(WEEK, AFTERNOON, occurredOn, occurredOnMillis, r, numberOfDelays, latestTimeframe);
-
-                            collector.emit(v);
-                        }
+                        w.moveForward(elapsedWeek);
 
                         /* Reduce memory by removing windows with no data */
-                        for (String r : expiredReasons) {
-                            map_week_morning.remove(r);
-                            map_week_afternoon.remove(r);
+                        expiredReasons.add(r);
+
+                        Values v = new Values(WEEK, MORNING, occurredOn, occurredOnMillis, r, numberOfDelays, latestTimeframe);
+
+                        collector.emit(v);
+                    }
+
+                    for (String r : map_week_afternoon.keySet()) {
+
+                        Window w = map_week_afternoon.get(r);
+                        if (w == null) {
+                            continue;
                         }
 
-                        this.latestCompletedTimeframeWeekMorning = latestTimeframe;
-                        this.latestCompletedTimeframeWeekAfternoon = latestTimeframe;
+                        int numberOfDelays = w.getEstimatedTotal();
+
+                        w.moveForward(elapsedWeek);
+
+                        /* Reduce memory by removing windows with no data */
+                        expiredReasons.add(r);
+
+                        Values v = new Values(WEEK, AFTERNOON, occurredOn, occurredOnMillis, r, numberOfDelays, latestTimeframe);
+
+                        collector.emit(v);
                     }
+
+                    /* Reduce memory by removing windows with no data */
+                    for (String r : expiredReasons) {
+                        map_week_morning.remove(r);
+                        map_week_afternoon.remove(r);
+                    }
+
+                    this.latestCompletedTimeframeWeekMorning = latestTimeframe;
+                    this.latestCompletedTimeframeWeekAfternoon = latestTimeframe;
                 }
             }
         }
+
 
         collector.ack(tuple);
     }
 
     private void handleBusData(Tuple tuple) {
 
-        String occurredOn           = tuple.getStringByField(OCCURRED_ON);
-        long occurredOnMillis       = tuple.getLongByField(OCCURREDON_MILLIS);
-        int msgID                   = tuple.getIntegerByField(F_MSGID);
-        String reason               = tuple.getStringByField(REASON);
-        String type                 = tuple.getStringByField(TYPE);
+        String occurredOn = tuple.getStringByField(OCCURRED_ON);
+        long occurredOnMillis = tuple.getLongByField(OCCURREDON_MILLIS);
+        int msgID = tuple.getIntegerByField(F_MSGID);
+        String reason = tuple.getStringByField(REASON);
+        String type = tuple.getStringByField(TYPE);
 
         if (this.latestCompletedTimeframeWeekMorning == 0)
             this.latestCompletedTimeframeWeekMorning = TimeUtils.lastWeek(occurredOnMillis);
@@ -405,7 +402,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
     }
 
     @Override
-    public void declareOutputFields (OutputFieldsDeclarer outputFieldsDeclarer){
+    public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
         outputFieldsDeclarer.declare(new Fields(TYPE, MORNING_OR_AFTERNOON, OCCURRED_ON, OCCURREDON_MILLIS, REASON, TOTAL, OCCURRED_ON_MILLIS_BASETIME));
     }
 
