@@ -46,6 +46,15 @@ public class GlobalRank extends BaseRichBolt {
 
         boolean updated = false;
 
+        List<RankItemQ2> a;
+        a = topKranking.getTopK().getRanking();
+        for (RankItemQ2 item : a) {
+            topKranking.remove(item);
+        }
+
+        System.out.println(ranking.getRanking().toString());
+        System.out.println(a);
+
         for (RankItemQ2 item : ranking.getRanking()) {
             updated |= topKranking.update(item);
             System.out.println(TimeUtils.retriveDataFromMillis(basetime) + " " + topKranking.toString());

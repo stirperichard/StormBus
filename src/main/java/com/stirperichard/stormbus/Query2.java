@@ -65,7 +65,8 @@ public class Query2 {
         whereas TotalRank is centralized and computes the global ranking */
 
         builder.setBolt("partialRank", new PartialRankQ2(3))
-                .setNumTasks(numTasks)
+                .setNumTasks(1)
+                //.setNumTasks(numTasks)
                 .fieldsGrouping("countByWindow2", new Fields(MORNING_OR_AFTERNOON));
 
         builder.setBolt("globalRank", new GlobalRank(3))
