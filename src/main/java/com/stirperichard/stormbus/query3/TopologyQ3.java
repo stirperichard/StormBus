@@ -2,14 +2,13 @@ package com.stirperichard.stormbus.query3;
 
 
 import com.stirperichard.stormbus.operator.DataGenerator;
-import com.stirperichard.stormbus.operator.FilterReason;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 
-public class TopologyQ1 {
+public class TopologyQ3 {
 
     public static String INPUT_FILE = "src/main/resources/dataset.csv";
     public static String OUTPUT_FILE = "result_query3.output";
