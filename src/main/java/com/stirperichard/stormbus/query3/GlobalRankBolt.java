@@ -43,6 +43,11 @@ public class GlobalRankBolt extends BaseRichBolt {
 
         RankingQ3 partialRanking = (RankingQ3) tuple.getValueByField(Configuration.PARTIAL_RANKING);
 
+        List<RankItemQ3> a;
+        a = topKranking.getTopK().getRanking();
+        for (RankItemQ3 item : a) {
+            topKranking.remove(item);
+        }
 
         /* Update global rank */
         boolean updated = false;

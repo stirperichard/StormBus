@@ -1,11 +1,11 @@
-package com.stirperichard.stormbus.utils;
+package com.stirperichard.stormbus.query2;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class TopKRanking {
+public class TopKRankingQ2 {
 
 	private Comparator<RankItemQ2> comparator = null;
 	private List<RankItemQ2> ranking = null;
@@ -13,8 +13,8 @@ public class TopKRanking {
 
 	private static final int NOT_PRESENT = -1;
 
-	public TopKRanking(int k) {
-		this.comparator = new RankItemComparator();
+	public TopKRankingQ2(int k) {
+		this.comparator = new RankItemComparatorQ2();
 		this.ranking = new ArrayList<RankItemQ2>();
 		this.topK = k;
 	}
@@ -88,14 +88,14 @@ public class TopKRanking {
 	
 	}
 	
-	public Ranking getTopK(){
+	public RankingQ2 getTopK(){
 		
 		List<RankItemQ2> top = new ArrayList<RankItemQ2>();
 		
 		if (ranking.isEmpty()){
-			Ranking topKRanking = new Ranking();
-			topKRanking.setRanking(top);
-			return topKRanking;
+			RankingQ2 topKRankingQ2 = new RankingQ2();
+			topKRankingQ2.setRanking(top);
+			return topKRankingQ2;
 		}
 		
 		int elems = Math.min(topK, ranking.size());
@@ -104,9 +104,9 @@ public class TopKRanking {
 			top.add(ranking.get(i));
 		}
 		
-		Ranking topKRanking = new Ranking();
-		topKRanking.setRanking(top);
-		return topKRanking;
+		RankingQ2 topKRankingQ2 = new RankingQ2();
+		topKRankingQ2.setRanking(top);
+		return topKRankingQ2;
 		
 	}
 	

@@ -1,7 +1,7 @@
-package com.stirperichard.stormbus.operator;
+package com.stirperichard.stormbus.query2;
 
 import com.stirperichard.stormbus.utils.TimeUtils;
-import com.stirperichard.stormbus.utils.Window;
+import com.stirperichard.stormbus.utils.WindowQ1Q2;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -28,7 +28,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
     private SimpleDateFormat sdf;
 
-    Map<String, Window> map_day_morning, map_day_afternoon, map_week_morning, map_week_afternoon;
+    Map<String, WindowQ1Q2> map_day_morning, map_day_afternoon, map_week_morning, map_week_afternoon;
 
     public static int ID_from_metronomeQ2 = 0;
     public static int ID_from_parseQ2 = 0;
@@ -50,10 +50,10 @@ public class CountByWindowQuery2 extends BaseRichBolt {
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.collector = outputCollector;
-        this.map_day_afternoon = new HashMap<String, Window>();
-        this.map_day_morning = new HashMap<String, Window>();
-        this.map_week_morning = new HashMap<String, Window>();
-        this.map_week_afternoon = new HashMap<String, Window>();
+        this.map_day_afternoon = new HashMap<String, WindowQ1Q2>();
+        this.map_day_morning = new HashMap<String, WindowQ1Q2>();
+        this.map_week_morning = new HashMap<String, WindowQ1Q2>();
+        this.map_week_afternoon = new HashMap<String, WindowQ1Q2>();
         this.sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     }
 
@@ -91,7 +91,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
                     for (String r : map_day_morning.keySet()) {
 
-                        Window w = map_day_morning.get(r);
+                        WindowQ1Q2 w = map_day_morning.get(r);
                         if (w == null) {
                             continue;
                         }
@@ -110,7 +110,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
                     for (String r : map_day_afternoon.keySet()) {
 
-                        Window w = map_day_afternoon.get(r);
+                        WindowQ1Q2 w = map_day_afternoon.get(r);
                         if (w == null) {
                             continue;
                         }
@@ -150,7 +150,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
                     for (String r : map_week_morning.keySet()) {
 
-                        Window w = map_week_morning.get(r);
+                        WindowQ1Q2 w = map_week_morning.get(r);
                         if (w == null) {
                             continue;
                         }
@@ -169,7 +169,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
                     for (String r : map_week_afternoon.keySet()) {
 
-                        Window w = map_week_afternoon.get(r);
+                        WindowQ1Q2 w = map_week_afternoon.get(r);
                         if (w == null) {
                             continue;
                         }
@@ -238,7 +238,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
                     for (String r : map_day_morning.keySet()) {
 
-                        Window w = map_day_morning.get(r);
+                        WindowQ1Q2 w = map_day_morning.get(r);
                         if (w == null) {
                             continue;
                         }
@@ -263,9 +263,9 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                     this.latestCompletedTimeframeDayMorning = latestTimeframeDay;
                 }
 
-                Window wDM = map_day_morning.get(reason);
+                WindowQ1Q2 wDM = map_day_morning.get(reason);
                 if (wDM == null) {
-                    wDM = new Window(1);
+                    wDM = new WindowQ1Q2(1);
                     map_day_morning.put(reason, wDM);
                 }
                 wDM.increment(1);
@@ -279,7 +279,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
                     for (String r : map_week_morning.keySet()) {
 
-                        Window w = map_week_morning.get(r);
+                        WindowQ1Q2 w = map_week_morning.get(r);
                         if (w == null) {
                             continue;
                         }
@@ -303,9 +303,9 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
                 }
 
-                Window wWM = map_week_morning.get(reason);
+                WindowQ1Q2 wWM = map_week_morning.get(reason);
                 if (wWM == null) {
-                    wWM = new Window(1);
+                    wWM = new WindowQ1Q2(1);
                     map_week_morning.put(reason, wWM);
                 }
                 wWM.increment(1);
@@ -321,7 +321,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
                     for (String r : map_day_afternoon.keySet()) {
 
-                        Window w = map_day_afternoon.get(r);
+                        WindowQ1Q2 w = map_day_afternoon.get(r);
                         if (w == null) {
                             continue;
                         }
@@ -345,9 +345,9 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                     this.latestCompletedTimeframeDayAfternoon = latestTimeframeDay;
                 }
 
-                Window wDA = map_day_afternoon.get(reason);
+                WindowQ1Q2 wDA = map_day_afternoon.get(reason);
                 if (wDA == null) {
-                    wDA = new Window(1);
+                    wDA = new WindowQ1Q2(1);
                     map_day_afternoon.put(reason, wDA);
                 }
                 wDA.increment(1);
@@ -362,7 +362,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
 
                     for (String r : map_week_afternoon.keySet()) {
 
-                        Window w = map_week_afternoon.get(r);
+                        WindowQ1Q2 w = map_week_afternoon.get(r);
                         if (w == null) {
                             continue;
                         }
@@ -387,9 +387,9 @@ public class CountByWindowQuery2 extends BaseRichBolt {
                 }
 
 
-                Window wWA = map_week_afternoon.get(reason);
+                WindowQ1Q2 wWA = map_week_afternoon.get(reason);
                 if (wWA == null) {
-                    wWA = new Window(1);
+                    wWA = new WindowQ1Q2(1);
                     map_week_afternoon.put(reason, wWA);
                 }
                 wWA.increment(1);

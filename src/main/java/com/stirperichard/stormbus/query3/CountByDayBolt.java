@@ -3,7 +3,7 @@ package com.stirperichard.stormbus.query3;
 import com.stirperichard.stormbus.operator.DataGenerator;
 import com.stirperichard.stormbus.operator.MetronomeQuery3;
 import com.stirperichard.stormbus.utils.Constants;
-import com.stirperichard.stormbus.utils.Window;
+import com.stirperichard.stormbus.utils.WindowQ1Q2;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CountByDayBolt extends BaseRichBolt {
-    private Map<String, Map<String, Window>> map;
+    private Map<String, Map<String, WindowQ1Q2>> map;
     private OutputCollector _collector;
     private long lastTick;
 
@@ -47,7 +47,7 @@ public class CountByDayBolt extends BaseRichBolt {
                 int count_other = 0;
 
                 for (String reason : this.map.get(busCompanyName).keySet()) {
-                    Window window = this.map.get(busCompanyName).get(reason);
+                    WindowQ1Q2 window = this.map.get(busCompanyName).get(reason);
 
                     if (reason.equals("Heavy Traffic")) {
                         count_heavy_traffic = window.getEstimatedTotal();
@@ -91,7 +91,7 @@ public class CountByDayBolt extends BaseRichBolt {
                 int count_other = 0;
 
                 for (String reason : this.map.get(busCompanyName).keySet()) {
-                    Window window = this.map.get(busCompanyName).get(reason);
+                    WindowQ1Q2 window = this.map.get(busCompanyName).get(reason);
 
                     if (reason.equals("Heavy Traffic")) {
                         count_heavy_traffic = window.getEstimatedTotal();
@@ -135,9 +135,9 @@ public class CountByDayBolt extends BaseRichBolt {
                 this.map.putIfAbsent(busCompanyName, new HashMap<>());
                 this.map.get(busCompanyName).putIfAbsent(reason, null);
 
-                Window window = this.map.get(busCompanyName).get(reason);
+                WindowQ1Q2 window = this.map.get(busCompanyName).get(reason);
                 if (window == null) {
-                    window = new Window(7);
+                    window = new WindowQ1Q2(7);
                     map.get(busCompanyName).put(reason, window); // This is a tumbling window
                 }
 

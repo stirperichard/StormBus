@@ -1,4 +1,4 @@
-package com.stirperichard.stormbus.operator;
+package com.stirperichard.stormbus.query2;
 
 import com.stirperichard.stormbus.utils.*;
 import org.apache.storm.task.OutputCollector;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 import static com.stirperichard.stormbus.utils.Constants.*;
 
-public class GlobalRank extends BaseRichBolt {
+public class GlobalRankQ2 extends BaseRichBolt {
 
     private RabbitMQManager rabbitmq;
 
@@ -23,20 +23,20 @@ public class GlobalRank extends BaseRichBolt {
     private String rabbitMqPassword;
 
     private OutputCollector collector;
-    private TopKRanking topKranking;
+    private TopKRankingQ2 topKrankingQ2;
     private int k;
 
     public String latest_tuple;
     public long latest_basetime;
 
-    public GlobalRank(int k) {
+    public GlobalRankQ2(int k) {
         this.k = k;
     }
     
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector outputCollector) {
         this.collector = outputCollector;
-        this.topKranking = new TopKRanking(k);
+        this.topKrankingQ2 = new TopKRankingQ2(k);
         this.latest_tuple = null;
         this.latest_basetime = 0;
     }
@@ -46,23 +46,23 @@ public class GlobalRank extends BaseRichBolt {
         String type 			    = input.getStringByField(TYPE);
         String occurredOn 		    = input.getStringByField(OCCURRED_ON);
         long basetime           	= input.getLongByField(OCCURRED_ON_MILLIS_BASETIME);
-        Ranking ranking 	        = (Ranking) input.getValueByField(TOPK);
+        RankingQ2 rankingQ2 = (RankingQ2) input.getValueByField(TOPK);
         String mOA                  = input.getStringByField(MORNING_OR_AFTERNOON);
 
         boolean updated = false;
 
         List<RankItemQ2> a;
-        a = topKranking.getTopK().getRanking();
+        a = topKrankingQ2.getTopK().getRanking();
         for (RankItemQ2 item : a) {
-            topKranking.remove(item);
+            topKrankingQ2.remove(item);
         }
 
-        System.out.println(ranking.getRanking().toString());
+        System.out.println(rankingQ2.getRanking().toString());
         System.out.println(a);
 
-        for (RankItemQ2 item : ranking.getRanking()) {
-            updated |= topKranking.update(item);
-            System.out.println(TimeUtils.retriveDataFromMillis(basetime) + " " + topKranking.toString());
+        for (RankItemQ2 item : rankingQ2.getRanking()) {
+            updated |= topKrankingQ2.update(item);
+            System.out.println(TimeUtils.retriveDataFromMillis(basetime) + " " + topKrankingQ2.toString());
         }
 
         String output = "";
@@ -71,7 +71,7 @@ public class GlobalRank extends BaseRichBolt {
 
             //System.out.println(TimeUtils.retriveDataFromMillis(basetime) + " - " + type + " - " + mOA + topKranking.toString());
 
-            List<RankItemQ2> globalTopK = topKranking.getTopK().getRanking();
+            List<RankItemQ2> globalTopK = topKrankingQ2.getTopK().getRanking();
 
             //System.out.println("\u001B[33m" + TimeUtils.retriveDataFromMillis(basetime) + " - " + type + " - " + mOA + "\u001B[0m");
 

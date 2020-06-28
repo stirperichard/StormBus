@@ -1,4 +1,4 @@
-package com.stirperichard.stormbus.utils;
+package com.stirperichard.stormbus.query2;
 
 import java.io.Serializable;
 

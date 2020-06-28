@@ -1,4 +1,4 @@
-package com.stirperichard.stormbus.operator;
+package com.stirperichard.stormbus.query2;
 
 import com.stirperichard.stormbus.utils.TimeUtils;
 import org.apache.storm.task.OutputCollector;

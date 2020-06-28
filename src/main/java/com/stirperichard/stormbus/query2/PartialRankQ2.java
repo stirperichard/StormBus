@@ -1,8 +1,5 @@
-package com.stirperichard.stormbus.operator;
+package com.stirperichard.stormbus.query2;
 
-import com.stirperichard.stormbus.utils.RankItemQ2;
-import com.stirperichard.stormbus.utils.Ranking;
-import com.stirperichard.stormbus.utils.TopKRanking;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -18,7 +15,7 @@ import static com.stirperichard.stormbus.utils.Constants.*;
 public class PartialRankQ2 extends BaseRichBolt {
 
     private OutputCollector collector;
-    private TopKRanking ranking;
+    private TopKRankingQ2 ranking;
     private int topK;
 
     public PartialRankQ2(int topk){
@@ -29,7 +26,7 @@ public class PartialRankQ2 extends BaseRichBolt {
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector=collector;
-        this.ranking = new TopKRanking(topK);
+        this.ranking = new TopKRankingQ2(topK);
     }
 
     @Override
@@ -47,7 +44,7 @@ public class PartialRankQ2 extends BaseRichBolt {
 
         /* Emit if the local top3 is changed */
         if (updated){
-            Ranking topK = ranking.getTopK();
+            RankingQ2 topK = ranking.getTopK();
             Values values = new Values(type, morningOrAfternoon, occurredOn, occurredOnMillisBasetime, topK);
 
             collector.emit(values);

@@ -1,15 +1,17 @@
-package com.stirperichard.stormbus.utils;
+package com.stirperichard.stormbus.query2;
+
+import com.stirperichard.stormbus.query2.RankItemQ2;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class Ranking implements Serializable {
+public class RankingQ2 implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	List<RankItemQ2> ranking;
 	
-	public Ranking() {
+	public RankingQ2() {
 	
 	}
 

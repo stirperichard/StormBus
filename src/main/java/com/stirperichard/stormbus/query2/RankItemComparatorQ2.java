@@ -1,8 +1,10 @@
-package com.stirperichard.stormbus.utils;
+package com.stirperichard.stormbus.query2;
+
+import com.stirperichard.stormbus.query2.RankItemQ2;
 
 import java.util.Comparator;
 
-public class RankItemComparator implements Comparator<RankItemQ2> {
+public class RankItemComparatorQ2 implements Comparator<RankItemQ2> {
 
 	@Override
 	public int compare(RankItemQ2 o1, RankItemQ2 o2) {

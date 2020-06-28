@@ -14,7 +14,7 @@ import java.util.Map;
 import static com.stirperichard.stormbus.utils.Constants.*;
 
 
-public class Metronome extends BaseRichBolt {
+public class MetronomeQ1Q2 extends BaseRichBolt {
 
     public static int prevIDMetronome;
 
@@ -26,7 +26,7 @@ public class Metronome extends BaseRichBolt {
 
     private int metronomeID = 0;
 
-    public Metronome() {
+    public MetronomeQ1Q2() {
     }
 
     @Override

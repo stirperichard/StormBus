@@ -20,8 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
-public class DataGeneratorQ1 extends BaseRichSpout {
-    private static final Logger LOG = LoggerFactory.getLogger(DataGeneratorQ1.class);
+public class DataGeneratorQ1Q2 extends BaseRichSpout {
+    private static final Logger LOG = LoggerFactory.getLogger(DataGeneratorQ1Q2.class);
 
     boolean _feof;
     private SpoutOutputCollector collector;
@@ -35,7 +35,7 @@ public class DataGeneratorQ1 extends BaseRichSpout {
     private int i = 0;
     private String header = null;
 
-    public DataGeneratorQ1(String dataPath) {
+    public DataGeneratorQ1Q2(String dataPath) {
         this.dataPath = dataPath;
         this.lastTs = 0L;
     }

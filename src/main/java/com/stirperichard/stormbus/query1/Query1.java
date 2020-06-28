@@ -1,18 +1,21 @@
-package com.stirperichard.stormbus;
+package com.stirperichard.stormbus.query1;
 
-import com.stirperichard.stormbus.operator.*;
+import com.stirperichard.stormbus.operator.DataGeneratorQ1Q2;
+import com.stirperichard.stormbus.operator.MetronomeQ1Q2;
+import com.stirperichard.stormbus.operator.ParseCSVQ1Q2;
 import com.stirperichard.stormbus.utils.TConf;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
+import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.tuple.Fields;
 
-import static com.stirperichard.stormbus.utils.Constants.*;
+import static com.stirperichard.stormbus.utils.Constants.S_METRONOME;
 
-public class Query2 {
+public class Query1 {
 
     public static String INPUT_FILE = "src/main/resources/dataset.csv";
+    public static String OUTPUT_PATH = "src/main/results";
 
     public static void main(String[] args) throws Exception {
 	// write your code here
@@ -21,10 +24,10 @@ public class Query2 {
         int redisPort 			= config.getInteger(TConf.REDIS_PORT);
         int numTasks 			= config.getInteger(TConf.NUM_TASKS);
         int numTasksMetronome   = 1;  // each task of the metronome generate a flood of messages
-        int numTasksGlobalRank  = 1;
         String rabbitMqHost 	= config.getString(TConf.RABBITMQ_HOST);
         String rabbitMqUsername = config.getString(TConf.RABBITMQ_USERNAME);
         String rabbitMqPassword	= config.getString(TConf.RABBITMQ_PASSWORD);
+
 
         System.out.println("===================================================== ");
         System.out.println("Configuration:");
@@ -34,78 +37,60 @@ public class Query2 {
         System.out.println("===================================================== ");
 
 
-        /* Build topology */
+
+        // Build topology
         TopologyBuilder builder = new TopologyBuilder();
 
         //Redis
-        builder.setSpout("datasource", new DataGeneratorQ1(INPUT_FILE));
+        builder.setSpout("datasource", new DataGeneratorQ1Q2(INPUT_FILE));
 
         //Parser
-        builder.setBolt("parser", new ParseCSV())
+        builder.setBolt("parser", new ParseCSVQ1Q2())
                 .setNumTasks(numTasks)
                 .allGrouping("datasource");
 
-        builder.setBolt("filterbytime", new FilterByTimeQ2())
-                .setNumTasks(numTasks)
-                .allGrouping("parser");
-
         //Metronome
-        builder.setBolt("metronome", new Metronome())
+        builder.setBolt("metronome", new MetronomeQ1Q2())
                 .setNumTasks(numTasksMetronome)
                 .allGrouping("parser");
 
         //Count by window
-        builder.setBolt("countByWindow2", new CountByWindowQuery2())
+        builder.setBolt("countByWindow", new CountByWindowQuery1())
                 .setNumTasks(numTasks)
-                .allGrouping("filterbytime")
+                .allGrouping("parser")
                 .allGrouping("metronome", S_METRONOME);
 
-		/* Two operators that realize the top-10 ranking in two steps (typical design pattern):
-        PartialRank can be distributed and parallelized,
-        whereas TotalRank is centralized and computes the global ranking */
+        /*
+        builder.setBolt("to_file", new DataWriter(OUTPUT_PATH))
+                .globalGrouping("countByWindow");
+         */
 
-        builder.setBolt("partialRank", new PartialRankQ2(3))
-                .setNumTasks(1)
-                //.setNumTasks(numTasks)
-                .fieldsGrouping("countByWindow2", new Fields(MORNING_OR_AFTERNOON));
-
-        builder.setBolt("globalRank", new GlobalRank(3))
-                .setNumTasks(numTasksGlobalRank)
-                .allGrouping("partialRank");
-/*
-
-        builder.setBolt("to_file", new DataWriter(OUTPUT_FILE)).globalGrouping("rankings");
-*/
         StormTopology stormTopology = builder.createTopology();
 
-        /* Create configurations */
+        // Create configurations
         Config conf = new Config();
         conf.setDebug(false);
-        /* number of workers to create for current topology */
+        // number of workers to create for current topology
         conf.setNumWorkers(3);
 
 
-        /* Update numWorkers using command-line received parameters */
+        // Update numWorkers using command-line received parameters
         if (args.length == 2){
-            try{
-                if (args[1] != null){
+            try {
+                if (args[1] != null) {
                     int numWorkers = Integer.parseInt(args[1]);
+                    // number of workers to create for current topology
                     conf.setNumWorkers(numWorkers);
+                    StormSubmitter.submitTopology(args[0], conf, stormTopology);
                     System.out.println("Number of workers to generate for current topology set to: " + numWorkers);
                 }
-            } catch (NumberFormatException nf){}
+            } catch (NumberFormatException ignored) {
+            }
+        } else {
+            // cluster
+            //StormSubmitter.submitTopology(args[0], conf, stormTopology);
+            LocalCluster cluster = new LocalCluster();
+            cluster.submitTopology("test", conf, stormTopology);
         }
-
-        // cluster
-        //StormSubmitter.submitTopology(args[0], conf, stormTopology);
-        LocalCluster cluster = new LocalCluster();
-        cluster.submitTopology("test", conf, builder.createTopology());
-        /*
-        Utils.sleep(10000);
-        cluster.killTopology("test");
-        cluster.shutdown();
-
-         */
-
     }
 }

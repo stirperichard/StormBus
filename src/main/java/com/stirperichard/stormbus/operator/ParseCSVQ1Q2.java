@@ -18,7 +18,7 @@ import java.util.Map;
 import static com.stirperichard.stormbus.utils.Constants.*;
 import static com.stirperichard.stormbus.utils.ParseTime.minutesDelayed;
 
-public class ParseCSV extends BaseRichBolt {
+public class ParseCSVQ1Q2 extends BaseRichBolt {
 
 
     private OutputCollector collector;
