@@ -67,7 +67,7 @@ public class Constants {
 
 
 	//Dataset
-	public static final String dataset = "/home/richard/IdeaProjects/StormBus/src/main/resources/bus-breakdown-and-delays.csv";
+	public static final String DATASET = "src/main/resources/dataset.csv";
 
 
 	//Millis

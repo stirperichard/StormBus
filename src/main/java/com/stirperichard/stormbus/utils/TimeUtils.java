@@ -173,4 +173,22 @@ public class TimeUtils {
         return date_final;
     }
 
+
+
+    public static long millisFromTimeStamp(String timestamp) {
+
+        try {
+            Date d = Constants.sdf.parse(timestamp);
+            Calendar date = new GregorianCalendar();
+            date.setTime(d);
+            date.set(Calendar.SECOND, 0);
+            date.set(Calendar.MILLISECOND, 0);
+
+            return date.getTime().getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return -1;
+    }
 }

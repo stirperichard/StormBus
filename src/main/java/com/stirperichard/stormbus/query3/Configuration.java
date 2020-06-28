@@ -16,9 +16,6 @@ public class Configuration {
     public static final String CONSUMER_GROUPID = "consumer";
     public static final String GLOBAL_GROUP_ID = "nyt-comments";
 
-    // Dataset configuration
-    public static final String DATASET = "/Users/simone/Projects/proj_2/data/Comments_jan-apr2018.csv";
-
     // Discard probability for the SamplingBolt
     public static final int PERCENT = 10;
 

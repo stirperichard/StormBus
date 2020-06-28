@@ -15,12 +15,7 @@ import static com.stirperichard.stormbus.utils.Constants.*;
 
 public class GlobalRank extends BaseRichBolt {
 
-    private RabbitMQManager rabbitmq;
 
-    private boolean USE_RABBIT;
-    private String rabbitMqHost;
-    private String rabbitMqUsername;
-    private String rabbitMqPassword;
 
     private OutputCollector collector;
     private TopKRanking topKranking;

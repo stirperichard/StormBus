@@ -1,4 +1,4 @@
-version: '3.6'
+version: '2.1'
 
 services:
 
@@ -22,11 +22,9 @@ services:
         depends_on:
             - zookeeper
             - storm-nimbus
-            - redis
         links:
             - zookeeper
             - storm-nimbus
-            - redis
         entrypoint: /bin/bash
         stdin_open: true
         tty: true
@@ -64,29 +62,27 @@ services:
         depends_on:
             - storm-nimbus
             - zookeeper
-            - redis
         links:
             - storm-nimbus
-            - redis
             - zookeeper
         restart: always
 
 
-    redis:
-        image: redis:3.2-alpine
-        container_name: redis
-        restart: always
-        ports:
-            - "6379:6379"
- 
-
-    redis-web-ui:
-        image: marian/rebrow:latest
-        hostname: redis-web-ui
-        container_name: redis_web_ui
+    kafka0:
+        image: effeerre/kafka
+        container_name: kafka0
         depends_on:
-            - redis
+            - zookeeper
+        links:
+            - zookeeper
         ports:
-            - "5001:5001"
+            - "9092:9092"
+        environment:
+            - BROKER_ID=0
+            #- KAFKA_CREATE_TOPICS:'{"query-1-input:1:1,query-1-output:1:1"}'
+            #- KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+        stdin_open: true
+        tty: true
+
 
     
