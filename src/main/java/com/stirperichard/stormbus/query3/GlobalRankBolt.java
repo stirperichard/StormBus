@@ -17,6 +17,8 @@ public class GlobalRankBolt extends BaseRichBolt {
     private OutputCollector _collector;
     private TopKRanking topKranking;
     private int k;
+    private long timestamp;
+    private String old_tuple;
 
     public GlobalRankBolt(int k) {
         this.k = k;
@@ -26,6 +28,9 @@ public class GlobalRankBolt extends BaseRichBolt {
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this._collector = outputCollector;
         this.topKranking = new TopKRanking(k);
+
+        this.timestamp = 0;
+        this.old_tuple = "";
     }
 
     @Override
@@ -74,9 +79,29 @@ public class GlobalRankBolt extends BaseRichBolt {
 
             /* piggyback delay */
             output += String.valueOf(delay);
-            System.out.println("\033[0;36m" + tupleTimestamp + ", " + currentTimestamp + ", " + partialRanking.getRanking().toString() + "\u001B[0m");
 
         }
+
+
+        String new_tuple = "\033[0;36m" + tupleTimestamp + ", " + currentTimestamp + ", " + partialRanking.getRanking().toString();
+
+        if(old_tuple.isEmpty()){
+            old_tuple = new_tuple;
+        }
+
+        if(timestamp == 0){
+            timestamp = tupleTimestamp;
+        }
+
+        if(timestamp < tupleTimestamp){
+            System.out.println(old_tuple);
+            timestamp = tupleTimestamp;
+        }
+
+        old_tuple = new_tuple;
+        //System.out.println(new_tuple);
+
+
 
 
         _collector.ack(tuple);

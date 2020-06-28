@@ -1,25 +1,26 @@
-package com.stirperichard.stormbus.operator;
+package com.stirperichard.stormbus.query3;
 
 
 /*  To observe: - BaseWindowedBolt instead BaseRichBolt;
                 - tick mechanism managed directly by Storm 1.0 (execution time, NOT event time)
  */
 
-import com.stirperichard.stormbus.enums.Reason;
-import com.stirperichard.stormbus.query3.Configuration;
+import com.stirperichard.stormbus.operator.DataGenerator;
+import com.stirperichard.stormbus.operator.MetronomeQuery3;
 import com.stirperichard.stormbus.utils.Constants;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
-import org.apache.storm.topology.base.BaseWindowedBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.windowing.TupleWindow;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Map;
 
 public class FilterReason extends BaseRichBolt {
 
