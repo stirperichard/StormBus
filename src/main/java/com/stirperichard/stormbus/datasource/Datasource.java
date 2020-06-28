@@ -34,7 +34,7 @@ public class Datasource {
                 {
                     long actualEventTime = getEventTime(line);
                     long diff = (actualEventTime - eventTime);// /1000
-                    Thread.sleep(diff);
+                    Thread.sleep(diff/1000);
                     eventTime = actualEventTime;
                     producer.produce(null, line);
                     k++;
