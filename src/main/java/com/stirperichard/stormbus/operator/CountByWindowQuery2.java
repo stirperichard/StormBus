@@ -61,7 +61,7 @@ public class CountByWindowQuery2 extends BaseRichBolt {
     public void execute(Tuple input) {
         if (input.getSourceStreamId().equals(S_METRONOME)) {
 
-            handleMetronomeMessage(input);  //sliding window based on event time
+            //handleMetronomeMessage(input);  //sliding window based on event time
 
         } else {
 

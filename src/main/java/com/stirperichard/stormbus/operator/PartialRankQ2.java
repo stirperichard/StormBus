@@ -43,15 +43,11 @@ public class PartialRankQ2 extends BaseRichBolt {
         long occurredOnMillis               = input.getLongByField(OCCURREDON_MILLIS);
 
         RankItemQ2 item = new RankItemQ2(reason, total, occurredOnMillis);
-        // System.out.println(item.toString());     //Fino qua tutto ok
         boolean updated = ranking.update(item);
 
         /* Emit if the local top3 is changed */
         if (updated){
             Ranking topK = ranking.getTopK();
-
-            //System.out.println(" PARTIAL RANKING" + topK.getRanking().toString());
-
             Values values = new Values(type, morningOrAfternoon, occurredOn, occurredOnMillisBasetime, topK);
 
             collector.emit(values);

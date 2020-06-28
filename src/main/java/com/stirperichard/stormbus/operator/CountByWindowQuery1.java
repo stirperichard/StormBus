@@ -109,7 +109,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
                             Values v = new Values(DAY, occurredOn, boro, avgPerBoroPerDay, latestCompletedTimeframeDay);
 
-                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerDay + " TIME BASE: " + latestCompletedTimeframeDay + "]" + "\u001B[0m");
+                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + avgPerBoroPerDay + " TIME BASE: " + latestCompletedTimeframeDay + "]" + "\u001B[0m");
 
                             collector.emit(v);
                         }
@@ -150,7 +150,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
                             Values v = new Values(WEEK, occurredOn, boro, avgDelayPerBoroPerWeek, latestCompletedTimeframeWeek);
 
-                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerWeek + " TIME BASE: " + latestCompletedTimeframeWeek + "]" + "\u001B[0m");
+                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + avgDelayPerBoroPerWeek + " TIME BASE: " + latestCompletedTimeframeWeek + "]" + "\u001B[0m");
 
                             collector.emit(v);
                         }
@@ -193,7 +193,7 @@ public class CountByWindowQuery1 extends BaseRichBolt {
 
                             Values v = new Values(MONTH, occurredOn, boro, avgDelayPerBoroPerMonth, latestCompletedTimeframeMonth);
 
-                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + delayPerBoroPerMonth + " TIME BASE: " + latestCompletedTimeframeMonth + "]" + "\u001B[0m");
+                            System.out.println("\u001B[36m" + "METRONOME ID: " + metronomeID + "   TYPE OF METRONOME: " + typeMetronome + "[" + boro + "," + avgDelayPerBoroPerMonth + " TIME BASE: " + latestCompletedTimeframeMonth + "]" + "\u001B[0m");
 
                             collector.emit(v);
                         }
@@ -258,8 +258,6 @@ public class CountByWindowQuery1 extends BaseRichBolt {
                     expiredRoutes.add(r);
 
                     Values v = new Values(DAY, occurredOn, r, avgPerBoroPerDay, time);
-
-                    System.out.println("EVENT OCCURRED AT:" + occurredOn + " BORO: " + r + " AVG BORO PER DAY: " + avgPerBoroPerDay);
 
                     collector.emit(v);
                 }

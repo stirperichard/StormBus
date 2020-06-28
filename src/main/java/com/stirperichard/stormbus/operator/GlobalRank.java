@@ -26,6 +26,9 @@ public class GlobalRank extends BaseRichBolt {
     private TopKRanking topKranking;
     private int k;
 
+    public String latest_tuple;
+    public long latest_basetime;
+
     public GlobalRank(int k) {
         this.k = k;
     }
@@ -34,6 +37,8 @@ public class GlobalRank extends BaseRichBolt {
     public void prepare(Map stormConf, TopologyContext context, OutputCollector outputCollector) {
         this.collector = outputCollector;
         this.topKranking = new TopKRanking(k);
+        this.latest_tuple = null;
+        this.latest_basetime = 0;
     }
 
     @Override
@@ -88,7 +93,21 @@ public class GlobalRank extends BaseRichBolt {
         }
         collector.ack(input);
 
-        System.out.println("GLOBAL RANK: " + " DAY/WEEK: " + type + " MORNING/AFTERNOON: " + mOA + " BASETIME: " + TimeUtils.retriveDataFromMillis(basetime) + " OUTPUT: " + output);
+        if(this.latest_tuple == null)
+            this.latest_tuple = TimeUtils.retriveDataFromMillis(basetime) +  " - "  + output;
+        if(latest_basetime == 0)
+            this.latest_basetime = basetime;
+
+        String new_tuple = "LATEST TUPLEEEEEEEEEEEEEEEEEEE" + TimeUtils.retriveDataFromMillis(basetime) +  " - "  + output;
+
+        if (latest_basetime < basetime){
+            System.out.println(latest_tuple);
+            this.latest_basetime = basetime;
+        }
+
+        this.latest_tuple = new_tuple;
+
+        System.out.println("GLOBAL RANK: " + " BASETIME: " + TimeUtils.retriveDataFromMillis(basetime) + " DAY/WEEK: " + type + " MORNING/AFTERNOON: " + mOA + " OUTPUT: " + output);
 
     }
 
