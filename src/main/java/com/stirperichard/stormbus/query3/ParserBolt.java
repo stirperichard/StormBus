@@ -41,9 +41,10 @@ public class ParserBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declareStream(Configuration.PARSER_STREAM_ID, new Fields(Configuration.PARSER_QUERY_1[0],
-                                                                                      Configuration.PARSER_QUERY_1[1],
-                                                                                      Configuration.CURRENNT_TIMESTAMP));
+        outputFieldsDeclarer.declareStream(Configuration.PARSER_STREAM_ID,
+                new Fields(Configuration.BUS_BREAKDOWN_ID, Configuration.REASON,
+                        Configuration.OCCURRED_ON,Configuration.BORO, Configuration.BUS_COMPANY_NAME,
+                        Configuration.HOW_LONG_DELAYED, Configuration.CURRENNT_TIMESTAMP));
     }
 
 }

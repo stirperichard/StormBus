@@ -1,11 +1,6 @@
 package com.stirperichard.stormbus.query3;
 
 
-/*  To observe: - BaseWindowedBolt instead BaseRichBolt;
-                - tick mechanism managed directly by Storm 1.0 (execution time, NOT event time)
- */
-
-import com.stirperichard.stormbus.operator.DataGenerator;
 import com.stirperichard.stormbus.operator.MetronomeQuery3;
 import com.stirperichard.stormbus.utils.Constants;
 import org.apache.storm.task.OutputCollector;
@@ -24,11 +19,9 @@ import java.util.Map;
 
 public class FilterReason extends BaseRichBolt {
 
-
-    OutputCollector collector;
+    private OutputCollector collector;
 
     public FilterReason() {
-
     }
 
     @Override
@@ -40,12 +33,11 @@ public class FilterReason extends BaseRichBolt {
     @Override
     public void execute(Tuple tuple) {
 
-        String busBreakdownId = tuple.getStringByField(DataGenerator.BUS_BREAKDOWN_ID);
-        String reason = tuple.getStringByField(DataGenerator.REASON);
-        String occurredOn = tuple.getStringByField(DataGenerator.OCCURRED_ON);
-        String boro = tuple.getStringByField(DataGenerator.BORO);
-        String busCompanyName = tuple.getStringByField(DataGenerator.BUS_COMPANY_NAME);
-        String howLongDelayed = tuple.getStringByField(DataGenerator.HOW_LONG_DELAYED);
+        String busBreakdownId = tuple.getStringByField(Configuration.BUS_BREAKDOWN_ID);
+        String reason = tuple.getStringByField(Configuration.REASON);
+        String occurredOn = tuple.getStringByField(Configuration.OCCURRED_ON);
+        String busCompanyName = tuple.getStringByField(Configuration.BUS_COMPANY_NAME);
+        String howLongDelayed = tuple.getStringByField(Configuration.HOW_LONG_DELAYED);
 
         long currentTimestamp = tuple.getLongByField(Configuration.CURRENNT_TIMESTAMP);
 
@@ -98,8 +90,8 @@ public class FilterReason extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields(DataGenerator.BUS_BREAKDOWN_ID, DataGenerator.REASON,
-                MetronomeQuery3.F_TIME, DataGenerator.BUS_COMPANY_NAME,
-                DataGenerator.HOW_LONG_DELAYED, Configuration.CURRENNT_TIMESTAMP));
+        declarer.declare(new Fields(Configuration.BUS_BREAKDOWN_ID, Configuration.REASON,
+                MetronomeQuery3.F_TIME, Configuration.BUS_COMPANY_NAME,
+                Configuration.HOW_LONG_DELAYED, Configuration.CURRENNT_TIMESTAMP));
     }
 }

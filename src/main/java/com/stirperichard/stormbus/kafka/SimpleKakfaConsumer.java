@@ -6,7 +6,6 @@ import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 
-import java.time.Duration;
 import java.util.*;
 
 public class SimpleKakfaConsumer implements Runnable {
@@ -74,7 +73,7 @@ public class SimpleKakfaConsumer implements Runnable {
                 Thread.sleep(1000);
                 ConsumerRecords<String, String> records =
                         //consumer.poll(Duration.ofMillis(1000));
-                        consumer.poll(Duration.ofSeconds(1));
+                        consumer.poll(1000);
                 for (ConsumerRecord<String, String> record : records)
                     System.out.println("[" + id + "] Consuming record:" +
                             " (key=" + record.key() + ", " +

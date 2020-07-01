@@ -34,4 +34,12 @@ public class Configuration {
     public static final String PARTIAL_RANKING = "partial_ranking";
     public static final String SCORE = "score";
 
+    public static final String MSGID				= "MSGID";
+    public static final String BUS_BREAKDOWN_ID    	= "busBreakdownId";
+    public static final String REASON           	= "reason";
+    public static final String OCCURRED_ON 	        = "occurredOn";
+    public static final String BORO 	            = "boro";
+    public static final String BUS_COMPANY_NAME 	= "busCompanyName";
+    public static final String HOW_LONG_DELAYED 	= "howLongDelayed";
+
 }

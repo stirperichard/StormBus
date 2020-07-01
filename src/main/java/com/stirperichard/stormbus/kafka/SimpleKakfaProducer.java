@@ -16,10 +16,8 @@ public class SimpleKakfaProducer {
     private Producer<String, String> producer;
 
     public SimpleKakfaProducer(String topic) {
-
         this.topic = topic;
         producer = createProducer();
-
     }
 
     private static Producer<String, String> createProducer() {
@@ -54,7 +52,7 @@ public class SimpleKakfaProducer {
 
     }
 
-        public void close() {
+    public void close() {
         producer.flush();
         producer.close();
     }
