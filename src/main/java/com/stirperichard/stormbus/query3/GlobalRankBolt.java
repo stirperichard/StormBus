@@ -1,6 +1,9 @@
 package com.stirperichard.stormbus.query3;
 
 
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -10,18 +13,25 @@ import org.apache.storm.tuple.Tuple;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 
 public class GlobalRankBolt extends BaseRichBolt {
 
     private OutputCollector _collector;
+    private KafkaProducer<String, String> producer;
     private TopKRanking topKranking;
     private int k;
+    private boolean USE_KAFKA;
+    private String kafkaTopic;
     private long timestamp;
     private String old_tuple;
 
-    public GlobalRankBolt(int k) {
+
+    public GlobalRankBolt(boolean USE_KAFKA, int k, String kafkaTopic) {
+        this.USE_KAFKA = USE_KAFKA;
         this.k = k;
+        this.kafkaTopic = kafkaTopic;
     }
 
     @Override
@@ -31,6 +41,15 @@ public class GlobalRankBolt extends BaseRichBolt {
 
         this.timestamp = 0;
         this.old_tuple = "";
+
+        if (this.USE_KAFKA) {
+            Properties props = new Properties();
+            props.put("bootstrap.servers", Configuration.BOOTSTRAP_SERVERS);
+            props.put("key.serializer", StringSerializer.class);
+            props.put("value.serializer", StringSerializer.class);
+
+            producer = new KafkaProducer<String, String>(props);
+        }
     }
 
     @Override
@@ -107,6 +126,8 @@ public class GlobalRankBolt extends BaseRichBolt {
         //System.out.println(new_tuple);
 
 
+        if (updated)
+            createOutputResponse(currentTimestamp, tupleTimestamp);
 
 
         _collector.ack(tuple);
@@ -115,8 +136,23 @@ public class GlobalRankBolt extends BaseRichBolt {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
         // I don't need to declare fields, cuz this is the final bolt :B
-        outputFieldsDeclarer.declare(new Fields("òllll"));
+        outputFieldsDeclarer.declare(new Fields("field"));
     }
+
+
+    private void createOutputResponse(long currentTimestamp, long tupleTimestamp) {
+        String result = "";
+        List<RankItemQ3> globalRanking = this.topKranking.getTopK().getRanking();
+
+        result.concat(String.valueOf(tupleTimestamp)).concat(", ");
+
+        for (RankItemQ3 rankItemQ3 : globalRanking)
+            result.concat(rankItemQ3.getBusCompanyName())
+                    .concat(", ").concat(String.valueOf(rankItemQ3.getScore()));
+
+        producer.send(new ProducerRecord<>(this.kafkaTopic, result));
+    }
+
 
 
 }

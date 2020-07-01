@@ -2,6 +2,7 @@ package com.stirperichard.stormbus.query3;
 
 
 import com.stirperichard.stormbus.operator.DataGenerator;
+import com.stirperichard.stormbus.operator.KafkaSpout;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
@@ -20,13 +21,11 @@ public class TopologyQ3 {
 
         TopologyBuilder builder = new TopologyBuilder();
 
-        builder.setSpout("spout", new DataGenerator(INPUT_FILE), 1);
+        builder.setSpout("spout", new KafkaSpout(), 1);
 
-        /*
         builder.setBolt("parser", new ParserBolt(), 1)
                 .localOrShuffleGrouping("spout");
 
-         */
 
         builder.setBolt("filter", new FilterReason(), 1)
                 //.localOrShuffleGrouping("spout")
@@ -50,7 +49,7 @@ public class TopologyQ3 {
                 .allGrouping("count_by_day");
 
 
-        builder.setBolt("global_h", new GlobalRankBolt(TOP_K_COMPANIES), 1)
+        builder.setBolt("global_h", new GlobalRankBolt(true, 3, Configuration.TOPIC_3_OUTPUT), 1)
                 .allGrouping("partial");
 
 

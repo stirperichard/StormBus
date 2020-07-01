@@ -5,10 +5,8 @@ import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+
+import java.util.*;
 
 public class SimpleKakfaConsumer implements Runnable {
 
