@@ -41,7 +41,7 @@ public class GlobalRankQ2 extends BaseRichBolt {
         String type 			    = input.getStringByField(TYPE);
         String occurredOn 		    = input.getStringByField(OCCURRED_ON);
         long basetime           	= input.getLongByField(OCCURRED_ON_MILLIS_BASETIME);
-        RankingQ2 rankingQ2 = (RankingQ2) input.getValueByField(TOPK);
+        RankingQ2 rankingQ2         = (RankingQ2) input.getValueByField(TOPK);
         String mOA                  = input.getStringByField(MORNING_OR_AFTERNOON);
 
         boolean updated = false;
@@ -52,8 +52,6 @@ public class GlobalRankQ2 extends BaseRichBolt {
             topKrankingQ2.remove(item);
         }
 
-        System.out.println(rankingQ2.getRanking().toString());
-        System.out.println(a);
 
         for (RankItemQ2 item : rankingQ2.getRanking()) {
             updated |= topKrankingQ2.update(item);
@@ -64,16 +62,11 @@ public class GlobalRankQ2 extends BaseRichBolt {
         /* Emit if the local top3 is changed */
         if (updated) {
 
-            //System.out.println(TimeUtils.retriveDataFromMillis(basetime) + " - " + type + " - " + mOA + topKranking.toString());
-
             List<RankItemQ2> globalTopK = topKrankingQ2.getTopK().getRanking();
-
-            //System.out.println("\u001B[33m" + TimeUtils.retriveDataFromMillis(basetime) + " - " + type + " - " + mOA + "\u001B[0m");
 
             for (int i = 0; i < globalTopK.size(); i++) {
                 RankItemQ2 item = globalTopK.get(i);
                 output += item.getReason();
-                //System.out.println("\u001B[33m" + item.toString() + "\u001B[0m");
                 output += ", ";
             }
 
@@ -93,7 +86,7 @@ public class GlobalRankQ2 extends BaseRichBolt {
         if(latest_basetime == 0)
             this.latest_basetime = basetime;
 
-        String new_tuple = "LATEST TUPLEEEEEEEEEEEEEEEEEEE" + TimeUtils.retriveDataFromMillis(basetime) +  " - "  + output;
+        String new_tuple = TimeUtils.retriveDataFromMillis(basetime) +  " - "  + output;
 
         if (latest_basetime < basetime){
             System.out.println(latest_tuple);

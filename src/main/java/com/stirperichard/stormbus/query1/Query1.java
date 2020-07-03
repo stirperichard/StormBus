@@ -1,6 +1,6 @@
 package com.stirperichard.stormbus.query1;
 
-import com.stirperichard.stormbus.operator.DataGeneratorQ1Q2;
+import com.stirperichard.stormbus.operator.KafkaSpout;
 import com.stirperichard.stormbus.operator.MetronomeQ1Q2;
 import com.stirperichard.stormbus.operator.ParseCSVQ1Q2;
 import com.stirperichard.stormbus.utils.TConf;
@@ -42,12 +42,12 @@ public class Query1 {
         TopologyBuilder builder = new TopologyBuilder();
 
         //Redis
-        builder.setSpout("datasource", new DataGeneratorQ1Q2(INPUT_FILE));
+        builder.setSpout("spout", new KafkaSpout(), 1);
 
         //Parser
         builder.setBolt("parser", new ParseCSVQ1Q2())
                 .setNumTasks(numTasks)
-                .allGrouping("datasource");
+                .allGrouping("spout");
 
         //Metronome
         builder.setBolt("metronome", new MetronomeQ1Q2())
