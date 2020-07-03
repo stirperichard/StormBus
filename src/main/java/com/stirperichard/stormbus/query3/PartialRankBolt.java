@@ -1,7 +1,7 @@
 package com.stirperichard.stormbus.query3;
 
 import com.stirperichard.stormbus.operator.DataGenerator;
-import com.stirperichard.stormbus.operator.MetronomeQuery3;
+import com.stirperichard.stormbus.utils.Constants;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -32,9 +32,9 @@ public class PartialRankBolt extends BaseRichBolt {
     public void execute(Tuple tuple) {
 
         String busCompanyName = tuple.getStringByField(DataGenerator.BUS_COMPANY_NAME);
-        double score = tuple.getDoubleByField(Configuration.SCORE);
-        long timestamp = tuple.getLongByField(Configuration.TIMESTAMP);
-        long currentTimestamp = tuple.getLongByField(Configuration.CURRENNT_TIMESTAMP);
+        double score = tuple.getDoubleByField(Constants.SCORE);
+        long timestamp = tuple.getLongByField(Constants.TIMESTAMP);
+        long currentTimestamp = tuple.getLongByField(Constants.CURRENNT_TIMESTAMP);
 
         boolean update = false;
         RankItemQ3 item = new RankItemQ3(busCompanyName, score);
@@ -56,6 +56,6 @@ public class PartialRankBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields(Configuration.TIMESTAMP, Configuration.CURRENNT_TIMESTAMP, DataGenerator.BUS_COMPANY_NAME, Configuration.PARTIAL_RANKING));
+        outputFieldsDeclarer.declare(new Fields(Constants.TIMESTAMP, Constants.CURRENNT_TIMESTAMP, DataGenerator.BUS_COMPANY_NAME, Constants.PARTIAL_RANKING));
     }
 }

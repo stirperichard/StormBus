@@ -1,6 +1,7 @@
 package com.stirperichard.stormbus.query3;
 
 
+import com.stirperichard.stormbus.utils.Constants;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -44,7 +45,7 @@ public class GlobalRankBolt extends BaseRichBolt {
 
         if (this.USE_KAFKA) {
             Properties props = new Properties();
-            props.put("bootstrap.servers", Configuration.BOOTSTRAP_SERVERS);
+            props.put("bootstrap.servers", Constants.BOOTSTRAP_SERVERS);
             props.put("key.serializer", StringSerializer.class);
             props.put("value.serializer", StringSerializer.class);
 
@@ -54,13 +55,13 @@ public class GlobalRankBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
-        long tupleTimestamp = tuple.getLongByField(Configuration.TIMESTAMP);
-        long currentTimestamp = tuple.getLongByField(Configuration.CURRENNT_TIMESTAMP);
+        long tupleTimestamp = tuple.getLongByField(Constants.TIMESTAMP);
+        long currentTimestamp = tuple.getLongByField(Constants.CURRENNT_TIMESTAMP);
         //String metronomeMsg = tuple.getStringByField(METRONOME_H_STREAM_ID);
         //String articleID = tuple.getStringByField(PARSER_QUERY_1[1]);
         //long estimatedTotal = tuple.getLongByField(ESTIMATED_TOTAL);
 
-        RankingQ3 partialRanking = (RankingQ3) tuple.getValueByField(Configuration.PARTIAL_RANKING);
+        RankingQ3 partialRanking = (RankingQ3) tuple.getValueByField(Constants.PARTIAL_RANKING);
 
         List<RankItemQ3> a;
         a = topKranking.getTopK().getRanking();

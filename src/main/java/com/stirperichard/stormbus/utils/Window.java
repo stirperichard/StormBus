@@ -1,6 +1,6 @@
 package com.stirperichard.stormbus.utils;
 
-public class WindowQ1Q2 {
+public class Window {
 
 	int[] timeframes; 
 	int currentIndex; 
@@ -8,7 +8,7 @@ public class WindowQ1Q2 {
 	int estimatedTotal;
 	int counter; //Conta il numero di eventi delay
 	
-	public WindowQ1Q2(int size) {
+	public Window(int size) {
 		
 		this.timeframes = new int[size];
 		this.size = size; 

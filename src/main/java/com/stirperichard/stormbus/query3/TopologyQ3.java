@@ -3,6 +3,7 @@ package com.stirperichard.stormbus.query3;
 
 import com.stirperichard.stormbus.operator.DataGenerator;
 import com.stirperichard.stormbus.operator.KafkaSpout;
+import com.stirperichard.stormbus.utils.Constants;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
@@ -11,9 +12,7 @@ import org.apache.storm.tuple.Fields;
 
 public class TopologyQ3 {
 
-    public static String INPUT_FILE = "src/main/resources/dataset.csv";
     public static String OUTPUT_FILE = "result_query3.output";
-
     public static int TOP_K_COMPANIES = 5;
 
 
@@ -28,7 +27,6 @@ public class TopologyQ3 {
 
 
         builder.setBolt("filter", new FilterReason(), 1)
-                //.localOrShuffleGrouping("spout")
                 .fieldsGrouping(
                         "spout",
                         DataGenerator.PROFIT_STREAM_ID,
@@ -41,15 +39,15 @@ public class TopologyQ3 {
 
         builder.setBolt("count_by_day", new CountByDayBolt(), 1)
                 .allGrouping("filter")
-                .allGrouping("metronome", Configuration.METRONOME_D_STREAM_ID)
-                .allGrouping("metronome", Configuration.METRONOME_W_STREAM_ID);
+                .allGrouping("metronome", Constants.METRONOME_D_STREAM_ID)
+                .allGrouping("metronome", Constants.METRONOME_W_STREAM_ID);
 
 
         builder.setBolt("partial", new PartialRankBolt(TOP_K_COMPANIES), 1)
                 .allGrouping("count_by_day");
 
 
-        builder.setBolt("global_h", new GlobalRankBolt(true, 3, Configuration.TOPIC_3_OUTPUT), 1)
+        builder.setBolt("global_h", new GlobalRankBolt(true, TOP_K_COMPANIES, Constants.TOPIC_3_OUTPUT), 1)
                 .allGrouping("partial");
 
 
@@ -63,7 +61,7 @@ public class TopologyQ3 {
         } else {
             conf.setMaxTaskParallelism(1);
             LocalCluster cluster = new LocalCluster();
-            cluster.submitTopology("query1", conf, builder.createTopology());
+            cluster.submitTopology("query3", conf, builder.createTopology());
             Thread.sleep(100000);
             cluster.shutdown();
         }

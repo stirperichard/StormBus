@@ -1,6 +1,6 @@
 package com.stirperichard.stormbus.kafka;
 
-import com.stirperichard.stormbus.query3.Configuration;
+import com.stirperichard.stormbus.utils.Constants;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 
@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutionException;
 
 public class SimpleKakfaProducer {
 
-    private final static String PRODUCER_ID = Configuration.PRODUCER_GROUPID;
+    private final static String PRODUCER_ID = Constants.PRODUCER_GROUPID;
 
     private String topic;
 
@@ -24,7 +24,7 @@ public class SimpleKakfaProducer {
 
         Properties props = new Properties();
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, Configuration.BOOTSTRAP_SERVERS);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, Constants.BOOTSTRAP_SERVERS);
         props.put(ProducerConfig.CLIENT_ID_CONFIG, PRODUCER_ID);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());

@@ -1,5 +1,0 @@
-package com.stirperichard.stormbus.enums;
-
-public enum Reason {
-    ACCIDENT, DELAYED_BY_SCHOOL, FLAT_TIRE, HEAVY_TRAFFIC, MECHANICAL_PROBLEM, OTHER, PROBLEM_RUN, WEATHER_CONDITION, WONT_START,
-}

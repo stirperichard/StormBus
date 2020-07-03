@@ -1,6 +1,5 @@
 package com.stirperichard.stormbus.operator;
 
-import com.stirperichard.stormbus.enums.Reason;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -130,25 +129,4 @@ public class ParseCSVQ1Q2 extends BaseRichBolt {
                 OCCURREDON_MILLIS, DAY_IN_MONTH));
     }
 
-    public static Reason mappingReason(String reason) {
-        if (reason.equals("Accident")) {
-            return Reason.ACCIDENT;
-        } else if (reason.equals("Delayed by School")) {
-            return Reason.DELAYED_BY_SCHOOL;
-        } else if (reason.equals("Flat Tire")) {
-            return Reason.FLAT_TIRE;
-        } else if (reason.equals("Heavy Traffic")) {
-            return Reason.HEAVY_TRAFFIC;
-        } else if (reason.equals("Mechanical Problem")) {
-            return Reason.MECHANICAL_PROBLEM;
-        } else if (reason.equals("Problem Run")) {
-            return Reason.PROBLEM_RUN;
-        } else if (reason.equals("Weather Condition")) {
-            return Reason.WEATHER_CONDITION;
-        } else if (reason.equals("Won't Start")) {
-            return Reason.WONT_START;
-        } else {
-            return Reason.OTHER;
-        }
-    }
 }

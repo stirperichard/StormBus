@@ -33,13 +33,13 @@ public class FilterReason extends BaseRichBolt {
     @Override
     public void execute(Tuple tuple) {
 
-        String busBreakdownId = tuple.getStringByField(Configuration.BUS_BREAKDOWN_ID);
-        String reason = tuple.getStringByField(Configuration.REASON);
-        String occurredOn = tuple.getStringByField(Configuration.OCCURRED_ON);
-        String busCompanyName = tuple.getStringByField(Configuration.BUS_COMPANY_NAME);
-        String howLongDelayed = tuple.getStringByField(Configuration.HOW_LONG_DELAYED);
+        String busBreakdownId = tuple.getStringByField(Constants.BUS_BREAKDOWN_ID);
+        String reason = tuple.getStringByField(Constants.REASON);
+        String occurredOn = tuple.getStringByField(Constants.OCCURRED_ON);
+        String busCompanyName = tuple.getStringByField(Constants.BUS_COMPANY_NAME);
+        String howLongDelayed = tuple.getStringByField(Constants.HOW_LONG_DELAYED);
 
-        long currentTimestamp = tuple.getLongByField(Configuration.CURRENNT_TIMESTAMP);
+        long currentTimestamp = tuple.getLongByField(Constants.CURRENNT_TIMESTAMP);
 
         long time = roundToCompletedMinute(occurredOn);
 
@@ -90,8 +90,8 @@ public class FilterReason extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields(Configuration.BUS_BREAKDOWN_ID, Configuration.REASON,
-                MetronomeQuery3.F_TIME, Configuration.BUS_COMPANY_NAME,
-                Configuration.HOW_LONG_DELAYED, Configuration.CURRENNT_TIMESTAMP));
+        declarer.declare(new Fields(Constants.BUS_BREAKDOWN_ID, Constants.REASON,
+                MetronomeQuery3.F_TIME, Constants.BUS_COMPANY_NAME,
+                Constants.HOW_LONG_DELAYED, Constants.CURRENNT_TIMESTAMP));
     }
 }
