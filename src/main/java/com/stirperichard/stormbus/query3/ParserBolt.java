@@ -31,7 +31,7 @@ public class ParserBolt extends BaseRichBolt {
             BusRide br = BusRide.parse(rawdata);
 
             Values values = new Values(br.busbreakdownID, br.reason, br.occurredOn, br.boro, br.busCompanyName, br.howLongDelayed, currentTimestamp);
-            _collector.emit(Constants.PARSER_STREAM_ID, values);
+            _collector.emit(values);
 
         } catch (ParseException e) {
             e.printStackTrace();
@@ -42,8 +42,7 @@ public class ParserBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declareStream(Constants.PARSER_STREAM_ID,
-                new Fields(Constants.BUS_BREAKDOWN_ID, Constants.REASON,
+        outputFieldsDeclarer.declare(new Fields(Constants.BUS_BREAKDOWN_ID, Constants.REASON,
                         Constants.OCCURRED_ON,Constants.BORO, Constants.BUS_COMPANY_NAME,
                         Constants.HOW_LONG_DELAYED, Constants.CURRENNT_TIMESTAMP));
     }

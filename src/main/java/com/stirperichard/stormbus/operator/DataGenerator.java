@@ -2,6 +2,7 @@ package com.stirperichard.stormbus.operator;
 
 import com.stirperichard.stormbus.entity.BusRide;
 import com.stirperichard.stormbus.utils.Constants;
+import com.stirperichard.stormbus.utils.TimeUtils;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -44,8 +45,7 @@ public class DataGenerator extends BaseRichSpout {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        Fields fields = new Fields(BUS_BREAKDOWN_ID, REASON, OCCURRED_ON, BORO, BUS_COMPANY_NAME, HOW_LONG_DELAYED, Constants.CURRENNT_TIMESTAMP);
-        outputFieldsDeclarer.declareStream(PROFIT_STREAM_ID, fields);
+        outputFieldsDeclarer.declare(new Fields(Constants.CURRENNT_TIMESTAMP, Constants.RAW_DATA));
     }
 
     @Override
@@ -72,7 +72,9 @@ public class DataGenerator extends BaseRichSpout {
 
             if (line != null && !line.equals(header)) {
                 BusRide tr = BusRide.parse(line);
-                Values tuple = new Values(tr.busbreakdownID, tr.reason.toString(), tr.occurredOn, tr.boro, tr.busCompanyName, tr.howLongDelayed, System.currentTimeMillis());
+                //Values tuple = new Values(tr.busbreakdownID, tr.reason.toString(), tr.occurredOn, tr.boro, tr.busCompanyName, tr.howLongDelayed, System.currentTimeMillis());
+
+                Values tuple = new Values(System.currentTimeMillis(), line);
 
                 long newTs = tr.getDateTime().getMillis();
                 if (lastTs > 0) {
@@ -86,7 +88,7 @@ public class DataGenerator extends BaseRichSpout {
                 }
                 lastTs = newTs;
 
-                this.collector.emit(PROFIT_STREAM_ID, tuple);
+                this.collector.emit(tuple);
                 System.out.println("\u001B[31m" + tuple + "\u001B[0m");
 
                 tupleID++;
