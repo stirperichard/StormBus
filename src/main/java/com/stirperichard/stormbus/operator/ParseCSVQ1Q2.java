@@ -19,12 +19,10 @@ import static com.stirperichard.stormbus.utils.ParseTime.minutesDelayed;
 
 public class ParseCSVQ1Q2 extends BaseRichBolt {
 
-
     private OutputCollector collector;
     private SimpleDateFormat sdf;
 
     public static int prevID;
-
 
     @Override
     public void prepare(@SuppressWarnings("rawtypes") Map map, TopologyContext topologyContext, OutputCollector outputCollector) {

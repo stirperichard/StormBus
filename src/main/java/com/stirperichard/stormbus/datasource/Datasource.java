@@ -4,6 +4,7 @@ package com.stirperichard.stormbus.datasource;
 import com.stirperichard.stormbus.kafka.SimpleKakfaProducer;
 import com.stirperichard.stormbus.utils.Constants;
 import com.stirperichard.stormbus.utils.TimeUtils;
+import org.apache.storm.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -18,6 +19,8 @@ public class Datasource {
         BufferedReader br = null;
         String line = "";
 
+        long lastTs = 0;
+
         try {
 
             br = new BufferedReader(new FileReader(Constants.DATASET));
@@ -31,15 +34,23 @@ public class Datasource {
             int k = 0;
             while ((line = br.readLine()) != null && k < 3000) {
                 {
-                    long actualEventTime = getEventTime(line);
-                    long diff = (actualEventTime - eventTime);// /1000
-                    Thread.sleep(diff/1000);
-                    eventTime = actualEventTime;
+                    long newTs = getEventTime(line);
+                    if (lastTs > 0) {
+                        // we have to sleep SECONDS_PER_TIME_UNIT
+                        // for each TIME_UNIT_IN_SECONDS passed from last tuple
+                        // to this one
+                        long fromTupleToSystemTime = Constants.TIME_UNIT_IN_SECONDS * Constants.SECONDS_PER_TIME_UNIT;
+                        long sleepTime = (newTs - lastTs) /  fromTupleToSystemTime;
+                        System.out.println("Sleep for: \u001B[31m" + sleepTime + "\u001B[0m");
+                        Utils.sleep(sleepTime);
+                    }
+                    lastTs = newTs;
+
                     producer.produce(null, line);
                     k++;
                 }
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
