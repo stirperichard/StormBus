@@ -1,5 +1,6 @@
 package com.stirperichard.stormbus.query2;
 
+import com.stirperichard.stormbus.operator.DataWriterQ3;
 import com.stirperichard.stormbus.operator.KafkaSpout;
 import com.stirperichard.stormbus.operator.MetronomeQ1Q2;
 import com.stirperichard.stormbus.operator.ParseCSVQ1Q2;
@@ -9,8 +10,7 @@ import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 
-import static com.stirperichard.stormbus.utils.Constants.MORNING_OR_AFTERNOON;
-import static com.stirperichard.stormbus.utils.Constants.S_METRONOME;
+import static com.stirperichard.stormbus.utils.Constants.*;
 
 public class Query2 {
 
@@ -65,6 +65,12 @@ public class Query2 {
         builder.setBolt("globalRank", new GlobalRankQ2(3))
                 .setNumTasks(numTasksGlobalRank)
                 .allGrouping("partialRank");
+
+
+        builder.setBolt("data_writer", new DataWriterQ3(QUERY_3_OUTPUT_DAILY), 1)
+                .allGrouping("global_h");
+
+
 /*
 
         builder.setBolt("to_file", new DataWriter(OUTPUT_FILE)).globalGrouping("rankings");
