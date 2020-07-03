@@ -1,5 +1,6 @@
 package com.stirperichard.stormbus.query1;
 
+import com.stirperichard.stormbus.operator.DataWriter;
 import com.stirperichard.stormbus.operator.KafkaSpout;
 import com.stirperichard.stormbus.operator.MetronomeQ1Q2;
 import com.stirperichard.stormbus.operator.ParseCSVQ1Q2;
@@ -14,7 +15,7 @@ import static com.stirperichard.stormbus.utils.Constants.S_METRONOME;
 public class Query1 {
 
     public static String INPUT_FILE = "src/main/resources/dataset.csv";
-    public static String OUTPUT_PATH = "src/main/results";
+    public static String OUTPUT_PATH = "src/main/resources/results/";
 
     public static void main(String[] args) throws Exception {
 	// write your code here
@@ -51,10 +52,10 @@ public class Query1 {
                 .allGrouping("parser")
                 .allGrouping("metronome", S_METRONOME);
 
-        /*
-        builder.setBolt("to_file", new DataWriter(OUTPUT_PATH))
+
+        builder.setBolt("to_file", new DataWriter(OUTPUT_PATH + "query1.csv"))
                 .globalGrouping("countByWindow");
-         */
+
 
         StormTopology stormTopology = builder.createTopology();
 

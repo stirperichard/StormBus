@@ -90,9 +90,8 @@ public class Query2 {
         }
 
         // cluster
-        //StormSubmitter.submitTopology(args[0], conf, stormTopology);
         LocalCluster cluster = new LocalCluster();
-        cluster.submitTopology("test", conf, builder.createTopology());
+        cluster.submitTopology("test", conf, stormTopology);
 
 
     }

@@ -34,27 +34,26 @@ public class ParseCSVQ1Q2 extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
-        String rawData = input.getStringByField(DATA);
-        long occurredOnMillis = input.getLongByField(OCCURRED_ON);
-        int id = input.getIntegerByField(ID);
+        String rawData = input.getStringByField(RAW_DATA);
+
+        if (rawData == null) {
+            collector.ack(input);
+            return;
+        }
+
+
+        /* Do NOT emit if the EOF has been reached */
+        String[] data = rawData.split(";", -1);
+        if (data == null || data.length != 21) {
+            collector.ack(input);
+            return;
+        }
+
+        int id = Integer.parseInt(data[1]);
 
         if (id > prevID) {
             prevID = id;
             /* Do NOT emit if the EOF has been reached */
-            if (rawData == null || rawData.equals(REDIS_EOF)) {
-                collector.ack(input);
-                return;
-            }
-
-
-            /* Do NOT emit if the EOF has been reached */
-            String[] data = rawData.split(";", -1);
-            if (data == null || data.length != 21) {
-                collector.ack(input);
-                return;
-            }
-
-            //System.out.println("\u001B[31m" + rawData + "\u001B[0m");
 
             Values values = new Values();
 

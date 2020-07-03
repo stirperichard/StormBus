@@ -43,9 +43,9 @@ public class DataWriter extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
-        String line = getNewLine(tuple);
+        String line = tuple.toString();
         try {
-            writer.write(line + "\n\n");
+            writer.write(line + "\n");
             writer.flush();
         } catch (IOException e) {
             e.printStackTrace();

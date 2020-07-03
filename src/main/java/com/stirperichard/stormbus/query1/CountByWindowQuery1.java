@@ -21,10 +21,8 @@ import static com.stirperichard.stormbus.utils.Constants.*;
 public class CountByWindowQuery1 extends BaseRichBolt {
 
     private OutputCollector collector;
-
     private long latestCompletedTimeframeHour, latestCompletedTimeframeDay, latestCompletedTimeframeWeek, latestCompletedTimeframeMonth;
-
-    Map<String, Window> map_hour, map_day, map_week, map_month;
+    Map<String, Window> map_day, map_week, map_month;
 
     public static int ID_from_metronome = 0;
     public static int ID_from_parse = 0;
@@ -50,7 +48,6 @@ public class CountByWindowQuery1 extends BaseRichBolt {
         this.latestCompletedTimeframeMonth = 0;
         this.latestCompletedTimeframeDay = 0;
         this.latestCompletedTimeframeWeek = 0;
-        this.map_hour = new HashMap<String, Window>();
         this.map_day = new HashMap<String, Window>();
         this.map_week = new HashMap<String, Window>();
         this.map_month = new HashMap<String, Window>();
@@ -384,6 +381,6 @@ public class CountByWindowQuery1 extends BaseRichBolt {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
 
-        outputFieldsDeclarer.declare(new Fields(TYPE, F_MSGID, OCCURRED_ON, AVG_DELAY, OCCURREDON_MILLIS, F_TIMESTAMP));
+        outputFieldsDeclarer.declare(new Fields(TYPE, OCCURRED_ON, BORO, AVG_DELAY, OCCURREDON_MILLIS));
     }
 }
