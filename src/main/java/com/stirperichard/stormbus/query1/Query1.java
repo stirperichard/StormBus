@@ -53,7 +53,7 @@ public class Query1 {
                 .allGrouping("metronome", S_METRONOME);
 
 
-        builder.setBolt("to_file", new DataWriter(OUTPUT_PATH + "query1.csv"))
+        builder.setBolt("to_file", new DataWriter(OUTPUT_PATH + "query1-daily.csv"))
                 .globalGrouping("countByWindow");
 
 
