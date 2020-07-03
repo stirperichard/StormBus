@@ -1,6 +1,7 @@
 package com.stirperichard.stormbus.query3;
 
 import com.stirperichard.stormbus.entity.BusRide;
+import com.stirperichard.stormbus.utils.Constants;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -23,14 +24,14 @@ public class ParserBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
-        String rawdata = tuple.getStringByField(Configuration.RAW_DATA);
-        long currentTimestamp = tuple.getLongByField(Configuration.CURRENNT_TIMESTAMP);
+        String rawdata = tuple.getStringByField(Constants.RAW_DATA);
+        long currentTimestamp = tuple.getLongByField(Constants.CURRENNT_TIMESTAMP);
 
         try {
             BusRide br = BusRide.parse(rawdata);
 
             Values values = new Values(br.busbreakdownID, br.reason, br.occurredOn, br.boro, br.busCompanyName, br.howLongDelayed, currentTimestamp);
-            _collector.emit(Configuration.PARSER_STREAM_ID, values);
+            _collector.emit(Constants.PARSER_STREAM_ID, values);
 
         } catch (ParseException e) {
             e.printStackTrace();
@@ -41,10 +42,10 @@ public class ParserBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declareStream(Configuration.PARSER_STREAM_ID,
-                new Fields(Configuration.BUS_BREAKDOWN_ID, Configuration.REASON,
-                        Configuration.OCCURRED_ON,Configuration.BORO, Configuration.BUS_COMPANY_NAME,
-                        Configuration.HOW_LONG_DELAYED, Configuration.CURRENNT_TIMESTAMP));
+        outputFieldsDeclarer.declareStream(Constants.PARSER_STREAM_ID,
+                new Fields(Constants.BUS_BREAKDOWN_ID, Constants.REASON,
+                        Constants.OCCURRED_ON,Constants.BORO, Constants.BUS_COMPANY_NAME,
+                        Constants.HOW_LONG_DELAYED, Constants.CURRENNT_TIMESTAMP));
     }
 
 }

@@ -3,7 +3,7 @@ package com.stirperichard.stormbus.query3;
 import com.stirperichard.stormbus.operator.DataGenerator;
 import com.stirperichard.stormbus.operator.MetronomeQuery3;
 import com.stirperichard.stormbus.utils.Constants;
-import com.stirperichard.stormbus.utils.WindowQ1Q2;
+import com.stirperichard.stormbus.utils.Window;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CountByDayBolt extends BaseRichBolt {
-    private Map<String, Map<String, WindowQ1Q2>> map;
+    private Map<String, Map<String, Window>> map;
     private OutputCollector _collector;
     private long lastTick;
 
@@ -32,10 +32,10 @@ public class CountByDayBolt extends BaseRichBolt {
         String msgType = tuple.getSourceStreamId();
 
         // When a tick by metronome is received, it handles the window shifting operations
-        if (msgType.equals(Configuration.METRONOME_D_STREAM_ID)) {
+        if (msgType.equals(Constants.METRONOME_D_STREAM_ID)) {
 
-            long tupleTimestamp = tuple.getLongByField(Configuration.TIMESTAMP);
-            long currentTimestamp = tuple.getLongByField(Configuration.CURRENNT_TIMESTAMP);
+            long tupleTimestamp = tuple.getLongByField(Constants.TIMESTAMP);
+            long currentTimestamp = tuple.getLongByField(Constants.CURRENNT_TIMESTAMP);
 
             int elapsedHour = (int) Math.ceil((tupleTimestamp - lastTick) / MetronomeBolt.MILLIS_IN_DAY);
 
@@ -47,7 +47,7 @@ public class CountByDayBolt extends BaseRichBolt {
                 int count_other = 0;
 
                 for (String reason : this.map.get(busCompanyName).keySet()) {
-                    WindowQ1Q2 window = this.map.get(busCompanyName).get(reason);
+                    Window window = this.map.get(busCompanyName).get(reason);
 
                     if (reason.equals("Heavy Traffic")) {
                         count_heavy_traffic = window.getEstimatedTotal();
@@ -66,7 +66,7 @@ public class CountByDayBolt extends BaseRichBolt {
                 Values values = new Values();
                 values.add(tupleTimestamp);
                 values.add(currentTimestamp);
-                values.add(Configuration.METRONOME_D_STREAM_ID);
+                values.add(Constants.METRONOME_D_STREAM_ID);
                 values.add(busCompanyName);
                 values.add(score);
 
@@ -76,10 +76,10 @@ public class CountByDayBolt extends BaseRichBolt {
             }
             this.lastTick = tupleTimestamp;
 
-        }else if (msgType.equals(Configuration.METRONOME_W_STREAM_ID)) {
+        }else if (msgType.equals(Constants.METRONOME_W_STREAM_ID)) {
 
-            long tupleTimestamp = tuple.getLongByField(Configuration.TIMESTAMP);
-            long currentTimestamp = tuple.getLongByField(Configuration.CURRENNT_TIMESTAMP);
+            long tupleTimestamp = tuple.getLongByField(Constants.TIMESTAMP);
+            long currentTimestamp = tuple.getLongByField(Constants.CURRENNT_TIMESTAMP);
 
             int elapsedHour = (int) Math.ceil((tupleTimestamp - lastTick) / MetronomeBolt.MILLIS_IN_WEEK);
 
@@ -91,7 +91,7 @@ public class CountByDayBolt extends BaseRichBolt {
                 int count_other = 0;
 
                 for (String reason : this.map.get(busCompanyName).keySet()) {
-                    WindowQ1Q2 window = this.map.get(busCompanyName).get(reason);
+                    Window window = this.map.get(busCompanyName).get(reason);
 
                     if (reason.equals("Heavy Traffic")) {
                         count_heavy_traffic = window.getEstimatedTotal();
@@ -110,7 +110,7 @@ public class CountByDayBolt extends BaseRichBolt {
                 Values values = new Values();
                 values.add(tupleTimestamp);
                 values.add(currentTimestamp);
-                values.add(Configuration.METRONOME_W_STREAM_ID);
+                values.add(Constants.METRONOME_W_STREAM_ID);
                 values.add(busCompanyName);
                 values.add(score);
 
@@ -135,9 +135,9 @@ public class CountByDayBolt extends BaseRichBolt {
                 this.map.putIfAbsent(busCompanyName, new HashMap<>());
                 this.map.get(busCompanyName).putIfAbsent(reason, null);
 
-                WindowQ1Q2 window = this.map.get(busCompanyName).get(reason);
+                Window window = this.map.get(busCompanyName).get(reason);
                 if (window == null) {
-                    window = new WindowQ1Q2(7);
+                    window = new Window(7);
                     map.get(busCompanyName).put(reason, window); // This is a tumbling window
                 }
 
@@ -154,8 +154,8 @@ public class CountByDayBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields(Configuration.TIMESTAMP, Configuration.CURRENNT_TIMESTAMP,
-                Configuration.METRONOME_D_STREAM_ID,
-                DataGenerator.BUS_COMPANY_NAME, Configuration.SCORE));
+        outputFieldsDeclarer.declare(new Fields(Constants.TIMESTAMP, Constants.CURRENNT_TIMESTAMP,
+                Constants.METRONOME_D_STREAM_ID,
+                DataGenerator.BUS_COMPANY_NAME, Constants.SCORE));
     }
 }

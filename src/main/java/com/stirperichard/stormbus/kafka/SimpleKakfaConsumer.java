@@ -1,6 +1,6 @@
 package com.stirperichard.stormbus.kafka;
 
-import com.stirperichard.stormbus.query3.Configuration;
+import com.stirperichard.stormbus.utils.Constants;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -10,7 +10,7 @@ import java.util.*;
 
 public class SimpleKakfaConsumer implements Runnable {
 
-    private final static String CONSUMER_GROUP_ID = Configuration.CONSUMER_GROUPID;
+    private final static String CONSUMER_GROUP_ID = Constants.CONSUMER_GROUPID;
 
     private Consumer<String, String> consumer;
     private int id;
@@ -28,7 +28,7 @@ public class SimpleKakfaConsumer implements Runnable {
 
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                Configuration.BOOTSTRAP_SERVERS);
+                Constants.BOOTSTRAP_SERVERS);
 
         props.put(ConsumerConfig.GROUP_ID_CONFIG,
                 CONSUMER_GROUP_ID);

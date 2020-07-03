@@ -3,7 +3,6 @@ package com.stirperichard.stormbus.query2;
 import com.stirperichard.stormbus.operator.DataGeneratorQ1Q2;
 import com.stirperichard.stormbus.operator.MetronomeQ1Q2;
 import com.stirperichard.stormbus.operator.ParseCSVQ1Q2;
-import com.stirperichard.stormbus.utils.TConf;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.generated.StormTopology;

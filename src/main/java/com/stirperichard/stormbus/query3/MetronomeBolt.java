@@ -36,7 +36,7 @@ public class MetronomeBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple tuple) {
         long time = Long.parseLong(tuple.getStringByField(MetronomeQuery3.F_TIME));
-        long currentTimestamp = tuple.getLongByField(Configuration.CURRENNT_TIMESTAMP);
+        long currentTimestamp = tuple.getLongByField(Constants.CURRENNT_TIMESTAMP);
 
         if (this.elapsedTime_d == 0)
             this.elapsedTime_d = time;
@@ -51,7 +51,7 @@ public class MetronomeBolt extends BaseRichBolt {
                 values.add(time);
                 values.add(currentTimestamp);
                 System.out.println("\033[0;32m" + "Tick Tuple day" + "\u001B[0m");
-                _collector.emit(Configuration.METRONOME_D_STREAM_ID, values);
+                _collector.emit(Constants.METRONOME_D_STREAM_ID, values);
             }
 
             // Metronome sends tick every week
@@ -61,7 +61,7 @@ public class MetronomeBolt extends BaseRichBolt {
                 values.add(time);
                 values.add(currentTimestamp);
                 System.out.println("\033[0;32m" + "Tick Tuple week" + "\u001B[0m");
-                _collector.emit(Configuration.METRONOME_W_STREAM_ID, values);
+                _collector.emit(Constants.METRONOME_W_STREAM_ID, values);
             }
         }
 
@@ -70,10 +70,10 @@ public class MetronomeBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declareStream(Configuration.METRONOME_D_STREAM_ID,
-                new Fields(Configuration.TIMESTAMP, Configuration.CURRENNT_TIMESTAMP));
+        outputFieldsDeclarer.declareStream(Constants.METRONOME_D_STREAM_ID,
+                new Fields(Constants.TIMESTAMP, Constants.CURRENNT_TIMESTAMP));
 
-        outputFieldsDeclarer.declareStream(Configuration.METRONOME_W_STREAM_ID,
-                new Fields(Configuration.TIMESTAMP, Configuration.CURRENNT_TIMESTAMP));
+        outputFieldsDeclarer.declareStream(Constants.METRONOME_W_STREAM_ID,
+                new Fields(Constants.TIMESTAMP, Constants.CURRENNT_TIMESTAMP));
     }
 }

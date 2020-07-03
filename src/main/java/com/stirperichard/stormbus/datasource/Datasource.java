@@ -2,7 +2,6 @@ package com.stirperichard.stormbus.datasource;
 
 
 import com.stirperichard.stormbus.kafka.SimpleKakfaProducer;
-import com.stirperichard.stormbus.query3.Configuration;
 import com.stirperichard.stormbus.utils.Constants;
 import com.stirperichard.stormbus.utils.TimeUtils;
 
@@ -14,7 +13,7 @@ public class Datasource {
 
     public static void main(String[] args) {
 
-        SimpleKakfaProducer producer = new SimpleKakfaProducer(Configuration.TOPIC_1_INPUT);
+        SimpleKakfaProducer producer = new SimpleKakfaProducer(Constants.TOPIC_1_INPUT);
 
         BufferedReader br = null;
         String line = "";

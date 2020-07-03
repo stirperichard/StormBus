@@ -1,15 +1,11 @@
 package com.stirperichard.stormbus.entity;
 
-import com.stirperichard.stormbus.enums.BreakdownOrRunningLate;
-import com.stirperichard.stormbus.enums.Reason;
 import org.apache.storm.shade.org.joda.time.DateTime;
 import org.apache.storm.shade.org.joda.time.format.DateTimeFormat;
 import org.apache.storm.shade.org.joda.time.format.DateTimeFormatter;
 
 import java.io.Serializable;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import static com.stirperichard.stormbus.utils.ParseTime.minutesDelayed;
 
@@ -34,7 +30,6 @@ public class BusRide implements Serializable {
     private String informedOn;
     private String incidentNumber;
     private String lastUpdatedOn;
-    private BreakdownOrRunningLate breakdownOrRunningLate;
     private String schoolAgeOrPreK;
 
     public String getSchoolYear() {
@@ -189,13 +184,7 @@ public class BusRide implements Serializable {
         this.lastUpdatedOn = lastUpdatedOn;
     }
 
-    public BreakdownOrRunningLate getBreakdownOrRunningLate() {
-        return breakdownOrRunningLate;
-    }
 
-    public void setBreakdownOrRunningLate(BreakdownOrRunningLate breakdownOrRunningLate) {
-        this.breakdownOrRunningLate = breakdownOrRunningLate;
-    }
 
     public String getSchoolAgeOrPreK() {
         return schoolAgeOrPreK;

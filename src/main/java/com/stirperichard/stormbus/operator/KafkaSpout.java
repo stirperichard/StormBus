@@ -1,6 +1,6 @@
 package com.stirperichard.stormbus.operator;
 
-import com.stirperichard.stormbus.query3.Configuration;
+import com.stirperichard.stormbus.utils.Constants;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -26,14 +26,14 @@ public class KafkaSpout extends BaseRichSpout {
         this._collector = spoutOutputCollector;
 
         Properties properties = new Properties();
-        properties.put("bootstrap.servers", Configuration.BOOTSTRAP_SERVERS);
-        properties.put("group.id", Configuration.GLOBAL_GROUP_ID);
+        properties.put("bootstrap.servers", Constants.BOOTSTRAP_SERVERS);
+        properties.put("group.id", Constants.GLOBAL_GROUP_ID);
         properties.put("enable.auto.commit", "true");
         properties.put("key.deserializer", StringDeserializer.class);
         properties.put("value.deserializer", StringDeserializer.class);
 
         consumer = new KafkaConsumer<>(properties);
-        consumer.subscribe(Arrays.asList(Configuration.TOPIC_1_INPUT));
+        consumer.subscribe(Arrays.asList(Constants.TOPIC_1_INPUT));
     }
 
     @Override
@@ -52,6 +52,6 @@ public class KafkaSpout extends BaseRichSpout {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields(Configuration.CURRENNT_TIMESTAMP, Configuration.RAW_DATA));
+        outputFieldsDeclarer.declare(new Fields(Constants.CURRENNT_TIMESTAMP, Constants.RAW_DATA));
     }
 }
