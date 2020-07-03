@@ -3,7 +3,6 @@ package com.stirperichard.stormbus.query2;
 import com.stirperichard.stormbus.operator.KafkaSpout;
 import com.stirperichard.stormbus.operator.MetronomeQ1Q2;
 import com.stirperichard.stormbus.operator.ParseCSVQ1Q2;
-import com.stirperichard.stormbus.utils.TConf;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.generated.StormTopology;
@@ -19,21 +18,12 @@ public class Query2 {
 
     public static void main(String[] args) throws Exception {
 	// write your code here
-        TConf config = new TConf();
-        String redisUrl			= config.getString(TConf.REDIS_URL);
-        int redisPort 			= config.getInteger(TConf.REDIS_PORT);
-        int numTasks 			= config.getInteger(TConf.NUM_TASKS);
+        int numTasks 			= 1;
         int numTasksMetronome   = 1;  // each task of the metronome generate a flood of messages
         int numTasksGlobalRank  = 1;
-        String rabbitMqHost 	= config.getString(TConf.RABBITMQ_HOST);
-        String rabbitMqUsername = config.getString(TConf.RABBITMQ_USERNAME);
-        String rabbitMqPassword	= config.getString(TConf.RABBITMQ_PASSWORD);
 
         System.out.println("===================================================== ");
-        System.out.println("Configuration:");
-        System.out.println("Redis: " + redisUrl + ":" + redisPort);
-        System.out.println("RabbitMQ: " + rabbitMqHost + " (user: " + rabbitMqUsername + ", " + rabbitMqPassword + ")");
-        System.out.println("Tasks:" + numTasks);
+        System.out.println("START QUERY 2:");
         System.out.println("===================================================== ");
 
 
@@ -103,12 +93,7 @@ public class Query2 {
         //StormSubmitter.submitTopology(args[0], conf, stormTopology);
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("test", conf, builder.createTopology());
-        /*
-        Utils.sleep(10000);
-        cluster.killTopology("test");
-        cluster.shutdown();
 
-         */
 
     }
 }
