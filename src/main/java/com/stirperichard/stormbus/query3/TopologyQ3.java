@@ -26,8 +26,8 @@ public class TopologyQ3 {
 
         TopologyBuilder builder = new TopologyBuilder();
 
-        //builder.setSpout("spout", new KafkaSpout(), 1);
-        builder.setSpout("spout", new DataGenerator("src/main/resources/dataset.csv"), 1);
+        builder.setSpout("spout", new KafkaSpout(), 1);
+        //builder.setSpout("spout", new DataGenerator("src/main/resources/dataset.csv"), 1);
 
         builder.setBolt("parser", new ParserBolt(), 1)
                 .shuffleGrouping("spout");
@@ -57,9 +57,6 @@ public class TopologyQ3 {
 
         builder.setBolt("global_h", new GlobalRankBolt(false, TOP_K_COMPANIES, Constants.TOPIC_3_OUTPUT), 1)
                 .allGrouping("partial");
-
-        builder.setBolt("data_writer", new DataWriterQ3(QUERY_3_OUTPUT_DAILY), 1)
-                .allGrouping("global_h");
 
 
         Config conf = new Config();
