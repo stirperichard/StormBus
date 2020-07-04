@@ -169,8 +169,7 @@ public class TimeUtils {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy'T'HH:mm:ss");
         Timestamp stamp = new Timestamp(timestamp);
         Date date = new Date(stamp.getTime());
-        String date_final = sdf.format(date);
-        return date_final;
+        return sdf.format(date);
     }
 
 

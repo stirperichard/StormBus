@@ -73,6 +73,12 @@ public class Constants {
 	//Dataset
 	public static final String DATASET = "src/main/resources/dataset.csv";
 
+	public static final String QUERY_2_OUTPUT_DAILY = "src/main/resources/results_query_2_daily.csv";
+	public static final String QUERY_2_OUTPUT_WEEKLY = "src/main/resources/results_query_2_weekly.csv";
+
+	public static final String QUERY_3_OUTPUT_DAILY = "src/main/resources/results_query_3_daily.csv";
+	public static final String QUERY_3_OUTPUT_WEEKLY = "src/main/resources/results_query_3_weekly.csv";
+
 
 	//Millis
 	public static final long MILLIS_HOUR = 1000*60*60;

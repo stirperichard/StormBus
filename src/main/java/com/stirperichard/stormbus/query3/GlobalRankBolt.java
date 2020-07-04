@@ -1,6 +1,7 @@
 package com.stirperichard.stormbus.query3;
 
 
+import com.stirperichard.stormbus.operator.DataGenerator;
 import com.stirperichard.stormbus.utils.Constants;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -11,7 +12,9 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -26,7 +29,7 @@ public class GlobalRankBolt extends BaseRichBolt {
     private boolean USE_KAFKA;
     private String kafkaTopic;
     private long timestamp;
-    private String old_tuple;
+    private List<RankItemQ3> old_tuple;
 
 
     public GlobalRankBolt(boolean USE_KAFKA, int k, String kafkaTopic) {
@@ -41,7 +44,7 @@ public class GlobalRankBolt extends BaseRichBolt {
         this.topKranking = new TopKRanking(k);
 
         this.timestamp = 0;
-        this.old_tuple = "";
+        this.old_tuple = new ArrayList<>();
 
         if (this.USE_KAFKA) {
             Properties props = new Properties();
@@ -49,7 +52,7 @@ public class GlobalRankBolt extends BaseRichBolt {
             props.put("key.serializer", StringSerializer.class);
             props.put("value.serializer", StringSerializer.class);
 
-            producer = new KafkaProducer<String, String>(props);
+            producer = new KafkaProducer<>(props);
         }
     }
 
@@ -57,9 +60,6 @@ public class GlobalRankBolt extends BaseRichBolt {
     public void execute(Tuple tuple) {
         long tupleTimestamp = tuple.getLongByField(Constants.TIMESTAMP);
         long currentTimestamp = tuple.getLongByField(Constants.CURRENNT_TIMESTAMP);
-        //String metronomeMsg = tuple.getStringByField(METRONOME_H_STREAM_ID);
-        //String articleID = tuple.getStringByField(PARSER_QUERY_1[1]);
-        //long estimatedTotal = tuple.getLongByField(ESTIMATED_TOTAL);
 
         RankingQ3 partialRanking = (RankingQ3) tuple.getValueByField(Constants.PARTIAL_RANKING);
 
@@ -108,7 +108,8 @@ public class GlobalRankBolt extends BaseRichBolt {
         }
 
 
-        String new_tuple = "\033[0;36m" + tupleTimestamp + ", " + currentTimestamp + ", " + partialRanking.getRanking().toString();
+        List<RankItemQ3> new_tuple = partialRanking.getRanking();
+
 
         if(old_tuple.isEmpty()){
             old_tuple = new_tuple;
@@ -119,16 +120,23 @@ public class GlobalRankBolt extends BaseRichBolt {
         }
 
         if(timestamp < tupleTimestamp){
+
+            Values values = new Values();
+            values.add(timestamp);
+            values.add(old_tuple);
+
             System.out.println(old_tuple);
             timestamp = tupleTimestamp;
+
+            _collector.emit(values);
+
         }
 
         old_tuple = new_tuple;
-        //System.out.println(new_tuple);
 
 
         if (updated)
-            createOutputResponse(currentTimestamp, tupleTimestamp);
+            //createOutputResponse(currentTimestamp, tupleTimestamp);
 
 
         _collector.ack(tuple);
@@ -137,7 +145,7 @@ public class GlobalRankBolt extends BaseRichBolt {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
         // I don't need to declare fields, cuz this is the final bolt :B
-        outputFieldsDeclarer.declare(new Fields("field"));
+        outputFieldsDeclarer.declare(new Fields(Constants.TIMESTAMP, Constants.RAW_DATA));
     }
 
 
